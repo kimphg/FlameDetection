@@ -70,11 +70,11 @@ int VideoHandler::handle()
                 {
                     cout << "Save key frame failed." << endl;
                 }
-                if (mSaveVideo)
-                {
-                    continueToDetect = false;
-                    continue;
-                }
+//                if (mSaveVideo)
+//                {
+//                    continueToDetect = false;
+//                    continue;
+//                }
 
                 cout << "Flame detected." << endl;
                 //return STATUS_FLAME_DETECTED;

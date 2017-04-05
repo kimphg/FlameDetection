@@ -16,9 +16,9 @@ int main(int argc, char *argv[])
 
 //    VideoHandler* videoHandler = NULL;
 
-    VideoHandler handler("C:/clips/IR.avi");
+    VideoHandler handler("C:/clips/IR.avi", true);
 //    VideoHandler handler("C:/clips/4.avi");
-//  VideoHandler handler(0);
+//     VideoHandler handler(0);
 
     videoHandler = &handler;
 
