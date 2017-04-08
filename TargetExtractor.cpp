@@ -599,7 +599,7 @@ void TargetExtractor::extract(const Mat& frame, map<int, Target>& targets, bool 
     
     //smallAreaFilter(12, 8);
 
-    smallAreaFilter(30, 30);
+    smallAreaFilter(20, 2);
     
     namedWindow("mask");
     moveWindow("mask", 350, 120);
