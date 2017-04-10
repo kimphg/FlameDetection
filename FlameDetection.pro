@@ -1,5 +1,6 @@
 QT += core
-QT -= gui
+QT += core gui
+QT += network
 
 CONFIG += c++11
 
@@ -15,7 +16,8 @@ SOURCES += main.cpp \
     FeatureAnalyzer.cpp \
     FlameDecider.cpp \
     FlameDetector.cpp \
-    TargetExtractor.cpp
+    TargetExtractor.cpp \
+    Config.cpp
 
 #INCLUDEPATH += $$PWD/../opencv/build/include
 INCLUDEPATH += "D:/OpenCV/OpenCV2411/build/include"
@@ -69,4 +71,5 @@ HEADERS += \
     FeatureAnalyzer.h \
     FlameDecider.h \
     FlameDetector.h \
-    TargetExtractor.h
+    TargetExtractor.h \
+    Config.h
