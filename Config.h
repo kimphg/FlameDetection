@@ -8,10 +8,6 @@
 #include <QRect>
 #include "common.h"
 
-
-//#define CONF_PATH           "D://Config/"
-//#define XML_FILE            "D://Config//config.xml"
-
 #define CONF_PATH           "..//Config/"
 #define XML_FILE            "..//Config//config.xml"
 
