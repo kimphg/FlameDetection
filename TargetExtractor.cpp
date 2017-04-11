@@ -206,9 +206,9 @@ void TargetExtractor::colorDetect(int redThreshold, double saturationThreshold)
 //                    mMask.at<uchar>(i, j) = 0;
 //                }
                 // dat nguong gia tri value
-                if (!(v[2] > 240
-                      && v[0] >240
-                      && v[1] > 240))
+                if (!(v[2] > 230
+                      && v[0] >230
+                      && v[1] > 230))
                 {
                     mMask.at<uchar>(i, j) = 0;
                 }
@@ -454,7 +454,7 @@ void TargetExtractor::blobTrack(map<int, Target>& targets)
     for (vector<ContourInfo>::iterator it = mContours.begin(); it != mContours.end(); it++) {
         regions.push_back(Region(&(*it), it->boundRect));
     }
-    
+    //merge nearby regions
     list<Region>::size_type lastRegionsSize;
     do {
         lastRegionsSize = regions.size();
@@ -470,9 +470,9 @@ void TargetExtractor::blobTrack(map<int, Target>& targets)
             }
         }
     } while (regions.size() != lastRegionsSize);
-    
+    //??
     srand((unsigned)clock());
-    
+    //add first target with random key
     if (targets.empty()) {
         int id;
         for (list<Region>::iterator it = regions.begin(); it != regions.end(); it++) {
@@ -484,43 +484,43 @@ void TargetExtractor::blobTrack(map<int, Target>& targets)
         }
         return;
     }
-    
-    list<Rectangle> rects;
+    // create list of region rects and target rects
+    list<Rectangle> regionRects;
     map<int, Rectangle> targetRects;
     for (list<Region>::iterator it = regions.begin(); it != regions.end(); it++) {
-        rects.push_back(it->rect);
+        regionRects.push_back(it->rect);
     }
     for (map<int, Target>::iterator it = targets.begin(); it != targets.end(); it++) {
-        rects.push_back(it->second.region.rect);
+        regionRects.push_back(it->second.region.rect);
         targetRects[it->first] = it->second.region.rect;
     }
-    
+    //merge nearby regions rects. Why??nearby regions are already merged
     list<Rectangle>::size_type lastRectsSize;
     do {
-        lastRectsSize = rects.size();
-        for (list<Rectangle>::iterator it1 = rects.begin(); it1 != rects.end(); it1++) {
+        lastRectsSize = regionRects.size();
+        for (list<Rectangle>::iterator it1 = regionRects.begin(); it1 != regionRects.end(); it1++) {
             list<Rectangle>::iterator it2 = it1;
-            for (it2++; it2 != rects.end(); ) {
+            for (it2++; it2 != regionRects.end(); ) {
                 if (it1->near(*it2)) {
                     it1->merge(*it2);
-                    rects.erase(it2++);
+                    regionRects.erase(it2++);
                 } else {
                     it2++;
                 }
             }
         }
-    } while (rects.size() != lastRectsSize);
-        
-    for (list<Rectangle>::iterator it1 = rects.begin(); it1 != rects.end(); it1++) {
+    } while (regionRects.size() != lastRectsSize);
+    //
+    for (list<Rectangle>::iterator it_region_rect = regionRects.begin(); it_region_rect != regionRects.end(); it_region_rect++) {
         vector<int> vi;
         vector<list<Region>::iterator> vlit;
         for (map<int, Rectangle>::iterator it2 = targetRects.begin(); it2 != targetRects.end(); it2++) {
-            if (it1->contains(it2->second.tl())) {
+            if (it_region_rect->contains(it2->second.tl())) {
                 vi.push_back(it2->first);
             }
         }
         for (list<Region>::iterator it2 = regions.begin(); it2 != regions.end(); it2++) {
-            if (it1->contains(it2->rect.tl())) {
+            if (it_region_rect->contains(it2->rect.tl())) {
                 vlit.push_back(it2);
             }
         }
@@ -531,7 +531,7 @@ void TargetExtractor::blobTrack(map<int, Target>& targets)
             targets[id].type = Target::TARGET_LOST;
             targets[id].lostTimes++;
         } else if (vi.size() == 0) {
-            assert(vlit.size() == 1);
+            assert(vlit.size() == 1);//??
             while (id = rand(), targets.find(id) != targets.end());
             targets[id] = Target();
             targets[id].type = Target::TARGET_NEW;
@@ -580,7 +580,7 @@ void TargetExtractor::extract(const Mat& frame, map<int, Target>& targets, bool 
      *     regionGrow: disable;
      */
     
-    movementDetect(0.012);
+    movementDetect(-1);
     colorDetect(0, 0.1);
     
     denoise(7, 5);
@@ -599,7 +599,11 @@ void TargetExtractor::extract(const Mat& frame, map<int, Target>& targets, bool 
     
     //smallAreaFilter(12, 8);
 
+<<<<<<< HEAD
+    smallAreaFilter(300, 2);
+=======
     smallAreaFilter(150, 2);
+>>>>>>> origin/master
     
     namedWindow("mask");
     moveWindow("mask", 350, 120);

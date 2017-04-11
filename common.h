@@ -30,7 +30,7 @@ using namespace cv;
 
 //#define OLD_ALGO
 //#define TRAIN_MODE
-//#define DEBUG_OUTPUT
+#define DEBUG_OUTPUT
 
 #ifdef TRAIN_MODE
 extern bool trainComplete;
