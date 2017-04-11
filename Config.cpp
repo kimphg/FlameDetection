@@ -11,6 +11,7 @@ void CConfig::LoadXmlFile()
     if (!QDir(CONF_PATH).exists())
         QDir().mkdir(CONF_PATH);
 
+
     CvFileStorage* fs = NULL;
 
     try
@@ -54,6 +55,8 @@ void CConfig::setDefault()
 void CConfig::SaveXmlFile()
 {
     CvFileStorage* fs = cvOpenFileStorage(XML_FILE, 0, CV_STORAGE_WRITE);
+    //CvFileStorage* fs = cvOpenFileStorage("./Config/config.xml", 0, CV_STORAGE_WRITE);
+
 
     cvWriteString(fs, "CamUrl", _config.strCamUrl.data());
     cvWriteInt(fs, "FrmPosX", _config.frmPosX);

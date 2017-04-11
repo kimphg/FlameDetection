@@ -7,10 +7,11 @@
 #include <string>
 #include <QRect>
 #include "common.h"
+#include "qdir.h"
 
-#define CONF_PATH           "..//Config/"
-#define XML_FILE            "..//Config//config.xml"
 
+#define CONF_PATH           ".//Config/"
+#define XML_FILE            "./Config/config.xml"
 
 struct Config_t
 {
