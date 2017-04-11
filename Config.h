@@ -18,7 +18,8 @@
 
 struct Config_t
 {
-
+    short frmWidth, frmHeight, frmPosX, frmPosY;
+    std::string strCamUrl;
 };
 
 class CConfig
