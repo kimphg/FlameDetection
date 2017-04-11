@@ -14,7 +14,8 @@
 
 struct Config_t
 {
-
+    std::string strCamUrl;
+    short frmPosX, frmPosY, frmWidth, frmHeight;
 };
 
 class CConfig
@@ -22,8 +23,8 @@ class CConfig
 public:
     Config_t _config;
 public:
-    CConfig();    
-    void setDefault();   
+    CConfig();
+    void setDefault();
     void SaveXmlFile();
     void LoadXmlFile();
 };

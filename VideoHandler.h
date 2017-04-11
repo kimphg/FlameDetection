@@ -12,7 +12,7 @@
 #include "common.h"
 #include "utils.h"
 #include "FlameDetector.h"
-
+#include "Config.h"
 
 class VideoHandler {
 private:

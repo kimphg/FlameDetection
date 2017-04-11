@@ -80,7 +80,7 @@ TargetExtractor::TargetExtractor()
 void TargetExtractor::movementDetect2(int threshold, double learningRate)
 {
     Mat gray, temp, background;
-    
+
     cvtColor(mFrame, gray, CV_BGR2GRAY);
     if (mBackground.empty()) {
         gray.convertTo(mBackground, CV_64F);
@@ -88,7 +88,7 @@ void TargetExtractor::movementDetect2(int threshold, double learningRate)
     mBackground.convertTo(background, CV_8U);
     absdiff(background, gray, mMask);
     cv::threshold(mMask, mMask, threshold, 255, THRESH_BINARY);
-    
+
     bitwise_not(mMask, temp);
     accumulateWeighted(gray, mBackground, learningRate, temp);
 }
@@ -98,7 +98,7 @@ void TargetExtractor::colorDetect2(int threshold)
     Mat temp;
     GaussianBlur(mFrame, temp, Size(3, 3), 0);
     cvtColor(temp, temp, CV_BGR2YCrCb);
-    
+
     Vec4d mean = sum(temp) / (temp.rows * temp.cols);
     for (int i = 0; i < temp.rows; i++) {
         for (int j = 0; j < temp.cols; j++) {
@@ -117,25 +117,25 @@ void TargetExtractor::regionGrow2(int areaThreshold, int diffThreshold)
 {
     Mat gray;
     cvtColor(mFrame, gray, CV_BGR2GRAY);
-    
+
     Mat temp;
     mMask.copyTo(temp);
-    
+
     vector<vector<Point> > contours;
     findContours(temp, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
-    
+
     int maxStackSize = gray.rows * gray.cols / 4;
     static int direction[8][2] = {
         { 0, 1 }, { 1, 1 }, { 1, 0 }, { 1, -1 },
         { 0, -1 }, { -1, -1 }, { -1, 0 }, { -1, 1 }
     };
-    
+
     for (int i = 0; i < contours.size(); i++) {
         if (contourArea(contours[i]) < areaThreshold) {
             drawContours(mMask, contours, i, Scalar(0), CV_FILLED);
             continue;
         }
-        
+
         // TODO: 修改种子选取方法
         Moments mu = moments(contours[i], false);
         Point seed(cvRound(mu.m10 / mu.m00), cvRound(mu.m01 / mu.m00));
@@ -143,31 +143,31 @@ void TargetExtractor::regionGrow2(int areaThreshold, int diffThreshold)
             cout << "Seed not in contour!" << endl;
             continue;
         }
-        
+
         stack<Point> pointStack;
         temp.at<uchar>(seed) = 255;
         pointStack.push(seed);
-        
+
         Mat temp = Mat::zeros(mMask.size(), mMask.type());
         uchar seedPixel = gray.at<uchar>(seed);
         Point cur, pop;
-        
+
         while (!pointStack.empty() && pointStack.size() < maxStackSize) {
-            
+
             pop = pointStack.top();
             pointStack.pop();
-            
+
             for (int k = 0; k < 8; k++) {
                 cur.x = pop.x + direction[k][0];
                 cur.y = pop.y + direction[k][1];
-                
+
                 if (cur.x < 0 || cur.x > gray.cols - 1 || cur.y < 0 || cur.y > gray.rows - 1) {
                     continue;
                 }
-                
+
                 if (temp.at<uchar>(cur) != 255) {
                     uchar curPixel = gray.at<uchar>(cur);
-                    
+
                     if (abs(curPixel - seedPixel) < diffThreshold) {
                         temp.at<uchar>(cur) = 255;
                         pointStack.push(cur);
@@ -192,7 +192,7 @@ void TargetExtractor::colorDetect(int redThreshold, double saturationThreshold)
 {
     Mat temp;
     GaussianBlur(mFrame, temp, Size(3, 3), 0);
-    
+
     for (int i = 0; i < temp.rows; i++) {
         for (int j = 0; j < temp.cols; j++) {
             if (mMask.at<uchar>(i, j) == 255) {
@@ -223,10 +223,10 @@ void TargetExtractor::denoise(int ksize, int threshold)
     if (r <= 0) {
         return;
     }
-    
+
     Mat density;
     calcDensity(mMask, density, ksize);
-    
+
     for (int i = r; i < mMask.rows - r; i++) {
         for (int j = r; j < mMask.cols - r; j++) {
             int count = density.at<int>(i, j);
@@ -243,13 +243,13 @@ void TargetExtractor::fill(int ksize, int threshold)
     if (r <= 0) {
         return;
     }
-    
+
     Mat density;
     calcDensity(mMask, density, ksize);
-    
+
     double half = ksize / 2.0, dist = ksize / 5.0;
     int max = ksize * ksize * 9 / 10;
-    
+
     for (int i = r; i < mMask.rows - r; i++) {
         for (int j = r; j < mMask.cols - r; j++) {
             int count = density.at<int>(i, j);
@@ -272,19 +272,19 @@ void TargetExtractor::regionGrow(int threshold)
 {
     Mat gray;
     cvtColor(mFrame, gray, CV_BGR2GRAY);
-    
+
     Mat temp;
     mMask.copyTo(temp);
-    
+
     vector<vector<Point> > contours;
     findContours(temp, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
-    
+
     int maxQueueSize = mFrame.rows * mFrame.cols / 4;
     static int direction[8][2] = {
         { 0, 1 }, { 1, 1 }, { 1, 0 }, { 1, -1 },
         { 0, -1 }, { -1, -1 }, { -1, 0 }, { -1, 1 }
     };
-    
+
     for (int i = 0; i < contours.size(); i++) {
         Rect rect = boundingRect(Mat(contours[i]));
         Mat mask = Mat::zeros(gray.size(), CV_8U);
@@ -293,11 +293,11 @@ void TargetExtractor::regionGrow(int threshold)
         Scalar m, s;
         meanStdDev(gray(rect), m, s, mask(rect));
         double mean = m[0], stdDev = s[0];
-        
+
         Mat temp;
         mMask.copyTo(temp);
         int origSize = size;
-        
+
         queue<Point> pointQueue;
         for (int j = 0; j < contours[i].size(); j++) {
             uchar pixel = gray.at<uchar>(contours[i][j]);
@@ -305,41 +305,41 @@ void TargetExtractor::regionGrow(int threshold)
                 pointQueue.push(contours[i][j]);
             }
         }
-        
+
         Point cur, pop;
         while (!pointQueue.empty() && pointQueue.size() < maxQueueSize) {
-            
+
             pop = pointQueue.front();
             pointQueue.pop();
             uchar pixel = gray.at<uchar>(pop);
-            
+
             for (int k = 0; k < 8; k++) {
                 cur.x = pop.x + direction[k][0];
                 cur.y = pop.y + direction[k][1];
-                
+
                 if (cur.x < 0 || cur.x > gray.cols - 1 || cur.y < 0 || cur.y > gray.rows - 1) {
                     continue;
                 }
-                
+
                 if (temp.at<uchar>(cur) != 255) {
                     uchar curPixel = gray.at<uchar>(cur);
-                    
+
                     if (abs(curPixel - pixel) < threshold &&
                         abs(curPixel - mean) < 1.0 * stdDev) {
-                        
+
                         temp.at<uchar>(cur) = 255;
-                        
+
                         double diff = curPixel - mean;
                         double learningRate = 1.0 / (++size);
                         mean = (1 - learningRate) * mean + learningRate * curPixel;
                         stdDev = sqrt((1 - learningRate) * stdDev * stdDev + learningRate * diff * diff);
-                        
+
                         pointQueue.push(cur);
                     }
                 }
             }
         }
-        
+
         if (pointQueue.empty()) {
             int incSize = size - origSize;
             if (incSize < mFrame.rows * mFrame.cols / 6 && incSize / origSize < 5) {
@@ -354,51 +354,51 @@ void TargetExtractor::smallAreaFilter(int threshold, int keep)
     vector<vector<Point> > contours;
     // this will change mMask, but it doesn't matter
     findContours(mMask, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
-    
+
     vector<int> indexes;
     vector<double> areas;
     vector<Rect> boundRects;
-    
+
     for (int i = 0; i < contours.size(); i++) {
         double area = contourArea(contours[i]);
         if (area < threshold) {
             continue;
         }
-        
+
         Rect rect = boundingRect(Mat(contours[i]));
         if (rect.width < 0.01 * mMask.cols && rect.height < 0.01 * mMask.rows) {
             continue;
         }
-        
+
         indexes.push_back(i);
         areas.push_back(area);
         boundRects.push_back(rect);
     }
-    
+
     mMask = Mat::zeros(mMask.size(), mMask.type());
     vector<ContourInfo>().swap(mContours);
-    
+
     if (areas.size() == 0) {
         return;
     }
-    
+
     while (keep > 0) {
         vector<double>::iterator it = max_element(areas.begin(), areas.end());
         if (*it == 0) {
             break;
         }
-        
+
         vector<double>::difference_type offset = it - areas.begin();
         int index = indexes[offset];
         drawContours(mMask, contours, index, Scalar::all(255), CV_FILLED);
-        
+
         // use 'resize' and 'swap' to avoid copy of contours
         vector<ContourInfo>::size_type size = mContours.size();
         mContours.resize(size + 1);
         mContours[size].contour.swap(contours[index]);
         mContours[size].area = areas[offset];
         mContours[size].boundRect = boundRects[offset];
-        
+
         *it = 0;
         keep--;
     }
@@ -409,7 +409,7 @@ void TargetExtractor::accumulate(int threshold)
     if (mMaskSum.empty()) {
         mMaskSum = Mat::zeros(mMask.size(), CV_8U);
     }
-    
+
     for (int i = 0; i < mMask.rows; i++) {
         for (int j = 0; j < mMask.cols; j++) {
             if (mMask.at<uchar>(i, j) == 255) {
@@ -420,7 +420,7 @@ void TargetExtractor::accumulate(int threshold)
 
     Mat temp;
     mMask.copyTo(temp);
-    
+
     mMaskQueue.push(temp);
     if (mMaskQueue.size() > MAX_MASK_QUEUE_SIZE) {
         Mat pop = mMaskQueue.front();
@@ -434,7 +434,7 @@ void TargetExtractor::accumulate(int threshold)
             }
         }
     }
-    
+
     if (mMaskQueue.size() == MAX_MASK_QUEUE_SIZE) {
         Mat result = Mat::zeros(mMask.size(), mMask.type());
         for (int i = 0; i < mMask.rows; i++) {
@@ -569,7 +569,7 @@ void TargetExtractor::blobTrack(map<int, Target>& targets)
 void TargetExtractor::extract(const Mat& frame, map<int, Target>& targets, bool track)
 {
     mFrame = frame;
-    
+
     /* for 2.avi:
      *     movement:   0.008;
      *     color:      120, 0.2;
@@ -579,36 +579,33 @@ void TargetExtractor::extract(const Mat& frame, map<int, Target>& targets, bool 
      *     color:      150, 0.4;
      *     regionGrow: disable;
      */
-    
+
     movementDetect(-1);
     colorDetect(0, 0.1);
-    
+
     denoise(7, 5);
     fill(7, 5);
     medianBlur(mMask, mMask, 3);
-    
+
     // TODO: make use of accumulate result
-    
+
     //regionGrow();
     //fill(7, 6);
     //medianBlur(mMask, mMask, 3);
-    
+
     //Mat element = getStructuringElement(MORPH_CROSS, Size(3, 3));
     //erode(mMask, mMask, element);
     //dilate(mMask, mMask, element);
-    
+
     //smallAreaFilter(12, 8);
 
-<<<<<<< HEAD
-    smallAreaFilter(300, 2);
-=======
     smallAreaFilter(150, 2);
->>>>>>> origin/master
-    
+
+
     namedWindow("mask");
     moveWindow("mask", 350, 120);
     imshow("mask", mMask);
-    
+
     if (track) {
         blobTrack(targets);
     }

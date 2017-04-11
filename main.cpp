@@ -10,7 +10,8 @@ bool trainComplete = false;
 #endif
 
 VideoHandler* videoHandler = NULL;
-CConfig         m_Config;
+CConfig mConfig;
+
 
 int main(int argc, char *argv[])
 {
@@ -18,14 +19,14 @@ int main(int argc, char *argv[])
 
 //    VideoHandler* videoHandler = NULL;
 
-<<<<<<< HEAD
+
 //    VideoHandler handler("C:/clips/IR.avi", true);
-    VideoHandler handler("D:/Example.asf", true);
-=======
-    VideoHandler handler("C:/clips/IR.asf", true);
->>>>>>> origin/master
+//    VideoHandler handler("D:/Example.asf", true);
+
+//    VideoHandler handler("C:/clips/IR.asf", true);
+
 //    VideoHandler handler("C:/clips/4.avi");
-//     VideoHandler handler(0);
+     VideoHandler handler(0, true);
 
     videoHandler = &handler;
 

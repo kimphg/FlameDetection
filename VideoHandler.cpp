@@ -3,10 +3,12 @@
 //  FlameDetection
 //
 //  Created by liberize on 14-4-6.
-//  Copyright (c) 2014年 liberize. All rights reserved.
+//  Copyright (c) 2014ๅนด liberize. All rights reserved.
 //
 
 #include "VideoHandler.h"
+
+extern CConfig mConfig;
 
 VideoHandler::VideoHandler(int device, bool saveKeyFrame, bool saveVideo)
 : mCapture(device)
@@ -43,6 +45,10 @@ int VideoHandler::handle()
 
     bool continueToDetect = true;
     int extraFrameCount = 0;
+
+    mCapture.set(CV_CAP_PROP_FRAME_WIDTH, mConfig._config.frmWidth);
+    mCapture.set(CV_CAP_PROP_FRAME_HEIGHT, mConfig._config.frmHeight);
+
 
     while (true)
     {
@@ -116,7 +122,7 @@ bool VideoHandler::saveVideo()
         getCurTime(mSaveVideoFile);
         mSaveVideoFile += ".mov";
         cout << "Saving video to '" << mSaveVideoFile << "'." << endl;
-        
+
         // in Mac OS X, only 'mp4v' is supported
         int fourcc = CV_FOURCC('m', 'p', '4', 'v');
         Size size = Size((int)mCapture.get(CV_CAP_PROP_FRAME_WIDTH),
