@@ -206,9 +206,9 @@ void TargetExtractor::colorDetect(int redThreshold, double saturationThreshold)
 //                    mMask.at<uchar>(i, j) = 0;
 //                }
                 // dat nguong gia tri value
-                if (!(v[2] > 230
-                      && v[0] >230
-                      && v[1] > 230))
+                if (!(v[2] > 240
+                      && v[0] >240
+                      && v[1] > 240))
                 {
                     mMask.at<uchar>(i, j) = 0;
                 }

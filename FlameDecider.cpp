@@ -165,14 +165,24 @@ bool FlameDecider::judge(map<int, Target>& targets)
     bool flameDetected = false;
     
     Mat temp;
-    mFrame.copyTo(temp);
+    mFrame.copyTo(temp);    
     
-    for (map<int, Target>::iterator it = targets.begin(); it != targets.end(); it++) {
+    for (map<int, Target>::iterator it = targets.begin(); it != targets.end(); it++)
+    {
         bool isFlame = svmPredict(it->second.feature);
         it->second.isFlame = isFlame;
-        if (isFlame) {
+        if (isFlame)
+        {
             flameDetected = true;
             rectangle(temp, it->second.region.rect, Scalar(0, 255, 0));
+
+            // save detected frame to jpg
+            string fileName;
+            getCurTime(fileName);
+            fileName += ".jpg";
+            cout << "Saving key frame to '" << fileName << "'." << endl;
+            imwrite(fileName, temp);
+
         }
     }
     

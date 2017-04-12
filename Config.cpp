@@ -31,7 +31,7 @@ void CConfig::LoadXmlFile()
         return;
     }
 
-    _config.strCamUrl        = cvReadStringByName(fs, 0, "CamUrl", "udp://@192.168.150.182:15006");
+    _config.strCamUrl        = cvReadStringByName(fs, 0, "CamUrl", "rtsp://192.168.0.253:554/stream1");
     _config.frmPosX          = cvReadIntByName(fs, 0, "FrmPosX", 0);
     _config.frmPosY          = cvReadIntByName(fs, 0, "FrmPosY", 0);
     _config.frmWidth         = cvReadIntByName(fs, 0, "FrmWidth", 800);
@@ -42,7 +42,7 @@ void CConfig::LoadXmlFile()
 
 void CConfig::setDefault()
 {
-    _config.strCamUrl       = "udp://@192.168.150.182:15006";
+    _config.strCamUrl       = "rtsp://192.168.0.253:554/stream1";
     _config.frmPosX         = 0;
     _config.frmPosY         = 0;
     _config.frmWidth        = 800;

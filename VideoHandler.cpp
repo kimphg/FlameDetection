@@ -46,8 +46,8 @@ int VideoHandler::handle()
     bool continueToDetect = true;
     int extraFrameCount = 0;
 
-    mCapture.set(CV_CAP_PROP_FRAME_WIDTH, mConfig._config.frmWidth);
-    mCapture.set(CV_CAP_PROP_FRAME_HEIGHT, mConfig._config.frmHeight);
+//    mCapture.set(CV_CAP_PROP_FRAME_WIDTH, mConfig._config.frmWidth);
+//    mCapture.set(CV_CAP_PROP_FRAME_HEIGHT, mConfig._config.frmHeight);
 
 
     while (true)
@@ -59,7 +59,8 @@ int VideoHandler::handle()
         }
 
         namedWindow("original");
-        moveWindow("original", 10, 120);
+        moveWindow("original", mConfig._config.frmPosX, mConfig._config.frmPosY);
+        resize(mFrame, mFrame, cvSize(mConfig._config.frmWidth, mConfig._config.frmHeight));
         imshow("original", mFrame);
 
         if (mSaveVideo && !saveVideo())
@@ -72,10 +73,10 @@ int VideoHandler::handle()
         {
             if (mDetector.detect(mFrame))
             {
-                if (mSaveKeyFrame && !saveFrame())
-                {
-                    cout << "Save key frame failed." << endl;
-                }
+//                if (mSaveKeyFrame && !saveFrame())
+//                {
+//                    cout << "Save key frame failed." << endl;
+//                }
 //                if (mSaveVideo)
 //                {
 //                    continueToDetect = false;
