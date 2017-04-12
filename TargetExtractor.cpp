@@ -206,9 +206,9 @@ void TargetExtractor::colorDetect(int redThreshold, double saturationThreshold)
 //                    mMask.at<uchar>(i, j) = 0;
 //                }
                 // dat nguong gia tri value
-                if (!(v[2] > 240
-                      && v[0] >240
-                      && v[1] > 240))
+                if (!(v[2] > 128
+                      && v[0] >128
+                      && v[1] > 128))
                 {
                     mMask.at<uchar>(i, j) = 0;
                 }
@@ -599,7 +599,7 @@ void TargetExtractor::extract(const Mat& frame, map<int, Target>& targets, bool 
 
     //smallAreaFilter(12, 8);
 
-    smallAreaFilter(150, 2);
+    smallAreaFilter(30, 2);
 
 
     namedWindow("mask");
