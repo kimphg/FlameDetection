@@ -71,7 +71,7 @@ private:
     void denoise(int ksize = 7, int threshold = 6);
     void fill(int ksize = 7, int threshold = 6);
     void regionGrow(int threshold = 20);
-    void smallAreaFilter(int threshold = 10, int keep = 5);
+    void contoursAreaFilter(int smallThreshold = 10, int largeThreshold = 100, int keep = 5);
     void accumulate(int threshold = 5);
     void blobTrack(map<int, Target>& targets);
     

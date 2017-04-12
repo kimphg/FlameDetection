@@ -206,9 +206,9 @@ void TargetExtractor::colorDetect(int redThreshold, double saturationThreshold)
 //                    mMask.at<uchar>(i, j) = 0;
 //                }
                 // dat nguong gia tri value
-                if (!(v[2] > 128
-                      && v[0] >128
-                      && v[1] > 128))
+                if (!(v[2] > 235
+                      && v[0] > 235
+                      && v[1] > 235))
                 {
                     mMask.at<uchar>(i, j) = 0;
                 }
@@ -349,7 +349,7 @@ void TargetExtractor::regionGrow(int threshold)
     }
 }
 
-void TargetExtractor::smallAreaFilter(int threshold, int keep)
+void TargetExtractor::contoursAreaFilter(int smallThreshold, int largeThreshold, int keep)
 {
     vector<vector<Point> > contours;
     // this will change mMask, but it doesn't matter
@@ -361,7 +361,7 @@ void TargetExtractor::smallAreaFilter(int threshold, int keep)
 
     for (int i = 0; i < contours.size(); i++) {
         double area = contourArea(contours[i]);
-        if (area < threshold) {
+        if ((area < smallThreshold) ||(area > largeThreshold)) {
             continue;
         }
 
@@ -597,9 +597,9 @@ void TargetExtractor::extract(const Mat& frame, map<int, Target>& targets, bool 
     //erode(mMask, mMask, element);
     //dilate(mMask, mMask, element);
 
-    //smallAreaFilter(12, 8);
+    //contoursAreaFilter(12, 8);
 
-    smallAreaFilter(30, 2);
+    contoursAreaFilter(80, 300, 2);
 
 
     namedWindow("mask");
