@@ -190,7 +190,7 @@ void TargetExtractor::movementDetect(double learningRate)
     mMOG.getBackgroundImage(mBackground);
 }
 
-void TargetExtractor::colorDetect(int redThreshold, double saturationThreshold)
+void TargetExtractor::colorDetect(int redThreshold, int greenThreshold,int blueThreshold)
 {
     Mat temp;
     GaussianBlur(mFrame, temp, Size(3, 3), 0);
@@ -208,9 +208,9 @@ void TargetExtractor::colorDetect(int redThreshold, double saturationThreshold)
 //                    mMask.at<uchar>(i, j) = 0;
 //                }
                 // dat nguong gia tri value
-                if (!(v[2] > mConfig._config.brightThreshold
-                      && v[0] > mConfig._config.brightThreshold
-                      && v[1] > mConfig._config.brightThreshold))
+                if (!(v[2] > redThreshold
+                      && v[0] > greenThreshold//
+                      && v[1] > blueThreshold))
                 {
                     mMask.at<uchar>(i, j) = 0;
                 }
@@ -583,7 +583,8 @@ void TargetExtractor::extract(const Mat& frame, map<int, Target>& targets, bool 
      */
 
     movementDetect(mConfig._config.movDetect);
-    colorDetect(0, 0.1);
+    int thresh = mConfig._config.brightThreshold;
+    colorDetect(thresh,thresh,thresh);
 
     denoise(7, 5);
     fill(7, 5);

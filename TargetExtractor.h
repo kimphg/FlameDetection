@@ -68,7 +68,7 @@ private:
 #endif
     
     void movementDetect(double learningRate = -1);
-    void colorDetect(int redThreshold = 150, double saturationThreshold = 0.4);
+    void colorDetect(int redThreshold = 200, int greenThreshold = 200, int blueThreshold=200);
     void denoise(int ksize = 7, int threshold = 6);
     void fill(int ksize = 7, int threshold = 6);
     void regionGrow(int threshold = 20);
