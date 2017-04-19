@@ -40,6 +40,7 @@ void CConfig::LoadXmlFile()
     _config.largeArea        = cvReadIntByName(fs, 0, "LargeArea", 300);
     _config.keepCount        = cvReadIntByName(fs, 0, "KeepCount", 2);
     _config.movDetect        = cvReadRealByName(fs, 0, "MovDetect", -1);
+    _config.brightThreshold  = cvReadIntByName(fs, 0, "BrightThreshold", 235);
 
     cvReleaseFileStorage(&fs);
 }
@@ -55,6 +56,7 @@ void CConfig::setDefault()
     _config.largeArea       = 300;
     _config.keepCount       = 2;
     _config.movDetect       = -1;
+    _config.brightThreshold = 235;
     SaveXmlFile();
 }
 
@@ -73,6 +75,7 @@ void CConfig::SaveXmlFile()
     cvWriteInt(fs, "LargeArea", _config.largeArea);
     cvWriteInt(fs, "KeepCount", _config.keepCount);
     cvWriteReal(fs, "MovDetect", _config.movDetect);
+    cvWriteInt(fs, "BrightThreshold", _config.brightThreshold);
 
     cvReleaseFileStorage(&fs);
 }
