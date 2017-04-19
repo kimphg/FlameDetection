@@ -11,6 +11,8 @@
 
 /**************** Rectangle ****************/
 
+extern CConfig mConfig;
+
 Rectangle::Rectangle()
 {
 }
@@ -580,7 +582,7 @@ void TargetExtractor::extract(const Mat& frame, map<int, Target>& targets, bool 
      *     regionGrow: disable;
      */
 
-    movementDetect(-1);
+    movementDetect(mConfig._config.movDetect);
     colorDetect(0, 0.1);
 
     denoise(7, 5);
@@ -599,7 +601,9 @@ void TargetExtractor::extract(const Mat& frame, map<int, Target>& targets, bool 
 
     //contoursAreaFilter(12, 8);
 
-    contoursAreaFilter(80, 300, 2);
+//    contoursAreaFilter(80, 300, 2);
+
+    contoursAreaFilter(mConfig._config.smallArea, mConfig._config.largeArea, mConfig._config.keepCount);
 
 
     namedWindow("mask");

@@ -11,6 +11,7 @@
 
 #include "common.h"
 #include "utils.h"
+#include "Config.h"
 
 struct Target;
 
