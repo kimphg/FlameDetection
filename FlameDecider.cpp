@@ -1,4 +1,4 @@
-//
+﻿//
 //  FlameDecider.cpp
 //  FlameDetection
 //

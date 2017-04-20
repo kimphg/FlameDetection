@@ -37,7 +37,6 @@ class Region {
 public:
     vector<ContourInfo*> contours;
     Rectangle rect;
-    
     Region();
     Region(ContourInfo* contour, const Rectangle& rect);
     Region(const vector<ContourInfo*>& contours, const Rectangle& rect);

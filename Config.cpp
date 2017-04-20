@@ -36,8 +36,8 @@ void CConfig::LoadXmlFile()
     _config.frmPosY          = cvReadIntByName(fs, 0, "FrmPosY", 0);
     _config.frmWidth         = cvReadIntByName(fs, 0, "FrmWidth", 800);
     _config.frmHeight        = cvReadIntByName(fs, 0, "FrmHeight", 600);
-    _config.smallArea        = cvReadIntByName(fs, 0, "SmallArea", 50);
-    _config.largeArea        = cvReadIntByName(fs, 0, "LargeArea", 300);
+    _config.smallArea        = cvReadIntByName(fs, 0, "SmallArea", 200);
+    _config.largeArea        = cvReadIntByName(fs, 0, "LargeArea", 1500);
     _config.keepCount        = cvReadIntByName(fs, 0, "KeepCount", 2);
     _config.movDetect        = cvReadRealByName(fs, 0, "MovDetect", -1);
     _config.brightThreshold  = cvReadIntByName(fs, 0, "BrightThreshold", 235);
@@ -52,8 +52,8 @@ void CConfig::setDefault()
     _config.frmPosY         = 0;
     _config.frmWidth        = 800;
     _config.frmHeight       = 600;
-    _config.smallArea       = 50;
-    _config.largeArea       = 300;
+    _config.smallArea       = 200;
+    _config.largeArea       = 1500;
     _config.keepCount       = 2;
     _config.movDetect       = -1;
     _config.brightThreshold = 235;

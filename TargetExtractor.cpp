@@ -192,6 +192,7 @@ void TargetExtractor::movementDetect(double learningRate)
 
 void TargetExtractor::colorDetect(int redThreshold, int greenThreshold,int blueThreshold)
 {
+
     Mat temp;
     GaussianBlur(mFrame, temp, Size(3, 3), 0);
 
@@ -287,7 +288,7 @@ void TargetExtractor::regionGrow(int threshold)
         { 0, -1 }, { -1, -1 }, { -1, 0 }, { -1, 1 }
     };
 
-    for (int i = 0; i < contours.size(); i++) {
+    for (uint i = 0; i < contours.size(); i++) {
         Rect rect = boundingRect(Mat(contours[i]));
         Mat mask = Mat::zeros(gray.size(), CV_8U);
         drawContours(mask, contours, i, Scalar::all(255), CV_FILLED);
@@ -301,7 +302,7 @@ void TargetExtractor::regionGrow(int threshold)
         int origSize = size;
 
         queue<Point> pointQueue;
-        for (int j = 0; j < contours[i].size(); j++) {
+        for (uint j = 0; j < contours[i].size(); j++) {
             uchar pixel = gray.at<uchar>(contours[i][j]);
             if (abs(pixel - mean) < 1.0 * stdDev) {
                 pointQueue.push(contours[i][j]);
@@ -361,7 +362,7 @@ void TargetExtractor::contoursAreaFilter(int smallThreshold, int largeThreshold,
     vector<double> areas;
     vector<Rect> boundRects;
 
-    for (int i = 0; i < contours.size(); i++) {
+    for (uint i = 0; i < contours.size(); i++) {
         double area = contourArea(contours[i]);
         if ((area < smallThreshold) ||(area > largeThreshold)) {
             continue;
@@ -486,44 +487,44 @@ void TargetExtractor::blobTrack(map<int, Target>& targets)
         }
         return;
     }
-    // create list of region rects and target rects
-    list<Rectangle> regionRects;
+    // create list of region rects and map of target rects id
+    list<Rectangle> mergedRegionRects;
     map<int, Rectangle> targetRects;
     for (list<Region>::iterator it = regions.begin(); it != regions.end(); it++) {
-        regionRects.push_back(it->rect);
+        mergedRegionRects.push_back(it->rect);
     }
     for (map<int, Target>::iterator it = targets.begin(); it != targets.end(); it++) {
-        regionRects.push_back(it->second.region.rect);
+        mergedRegionRects.push_back(it->second.region.rect);
         targetRects[it->first] = it->second.region.rect;
     }
-    //merge nearby regions rects. Why??nearby regions are already merged
+    //merge regions rects of existing targets and new regions
     list<Rectangle>::size_type lastRectsSize;
     do {
-        lastRectsSize = regionRects.size();
-        for (list<Rectangle>::iterator it1 = regionRects.begin(); it1 != regionRects.end(); it1++) {
+        lastRectsSize = mergedRegionRects.size();
+        for (list<Rectangle>::iterator it1 = mergedRegionRects.begin(); it1 != mergedRegionRects.end(); it1++) {
             list<Rectangle>::iterator it2 = it1;
-            for (it2++; it2 != regionRects.end(); ) {
+            for (it2++; it2 != mergedRegionRects.end(); ) {
                 if (it1->near(*it2)) {
                     it1->merge(*it2);
-                    regionRects.erase(it2++);
+                    mergedRegionRects.erase(it2++);
                 } else {
                     it2++;
                 }
             }
         }
-    } while (regionRects.size() != lastRectsSize);
-    //
-    for (list<Rectangle>::iterator it_region_rect = regionRects.begin(); it_region_rect != regionRects.end(); it_region_rect++) {
+    } while (mergedRegionRects.size() != lastRectsSize);
+    // add new regions to existing targets
+    for (list<Rectangle>::iterator it_merged_region_rect = mergedRegionRects.begin(); it_merged_region_rect != mergedRegionRects.end(); it_merged_region_rect++) {
         vector<int> vi;
         vector<list<Region>::iterator> vlit;
-        for (map<int, Rectangle>::iterator it2 = targetRects.begin(); it2 != targetRects.end(); it2++) {
-            if (it_region_rect->contains(it2->second.tl())) {
-                vi.push_back(it2->first);
+        for (map<int, Rectangle>::iterator it_target_rect = targetRects.begin(); it_target_rect != targetRects.end(); it_target_rect++) {
+            if (it_merged_region_rect->contains(it_target_rect->second.tl())) {//!!! check insise
+                vi.push_back(it_target_rect->first);//save the key of target inside merged region
             }
         }
-        for (list<Region>::iterator it2 = regions.begin(); it2 != regions.end(); it2++) {
-            if (it_region_rect->contains(it2->rect.tl())) {
-                vlit.push_back(it2);
+        for (list<Region>::iterator it_regions = regions.begin(); it_regions != regions.end(); it_regions++) {
+            if (it_merged_region_rect->contains(it_regions->rect.tl())) {
+                vlit.push_back(it_regions);
             }
         }
         int id;
@@ -551,7 +552,9 @@ void TargetExtractor::blobTrack(map<int, Target>& targets)
                 targets[id].region = r;
                 targets[id].times++;
             } else {
+                //find random second target?? so this code will track only 2 target??
                 while (id = rand(), targets.find(id) != targets.end());
+                //
                 targets[id] = Target();
                 targets[id].type = Target::TARGET_MERGED;
                 targets[id].region = r;
@@ -582,7 +585,7 @@ void TargetExtractor::extract(const Mat& frame, map<int, Target>& targets, bool 
      *     regionGrow: disable;
      */
 
-    movementDetect(mConfig._config.movDetect);
+    movementDetect(-10);
     int thresh = mConfig._config.brightThreshold;
     colorDetect(thresh,thresh,thresh);
 
