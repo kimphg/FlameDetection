@@ -450,7 +450,16 @@ void TargetExtractor::accumulate(int threshold)
         imshow("accumulated", result);
     }
 }
-
+void TargetExtractor::addNewTarget(map<int, Target>& targets,Region reg)
+{
+    srand((unsigned)clock());
+    int id;
+    while (id = rand(), targets.find(id) != targets.end());
+    targets[id] = Target();
+    targets[id].type = Target::TARGET_NEW;
+    targets[id].region = reg;
+    targets[id].times++;
+}
 void TargetExtractor::blobTrack(map<int, Target>& targets)
 {
     list<Region> regions;
@@ -473,17 +482,72 @@ void TargetExtractor::blobTrack(map<int, Target>& targets)
             }
         }
     } while (regions.size() != lastRegionsSize);
-    //??
+#define PHUONGS_ALGORITHM
+#ifdef PHUONGS_ALGORITHM
+    // reset all targets
+    for (map<int, Target>::iterator it_target = targets.begin();
+         it_target != targets.end();
+         it_target++)
+    {
+        it_target->second.type = Target::TARGET_LOST;
+    }
+    //check all the regions
+    for (list<Region>::iterator it_reg = regions.begin();
+         it_reg != regions.end();
+         it_reg++)
+    {
+        //find matching target of current region
+        bool noMatch = true;
+        for (map<int, Target>::iterator it_target = targets.begin();
+             it_target != targets.end();
+             it_target++)
+        {
+
+            if(it_reg->near((it_target->second.region))&&
+                    (it_target->second.type == Target::TARGET_LOST))
+            {
+
+                it_target->second.region = *it_reg;
+                it_target->second.times++;
+                it_target->second.type = Target::TARGET_EXISTING;
+                noMatch = false;
+                break;
+            }
+
+        }
+        if(noMatch)
+        {
+            addNewTarget(targets,*it_reg);
+            break;
+        }
+    }
+    //recheck all targets
+    for (map<int, Target>::iterator it_target = targets.begin();it_target != targets.end();)
+    {
+        if(it_target->second.type == Target::TARGET_LOST)
+        {
+            it_target->second.lostTimes++;
+            if(it_target->second.lostTimes>=10)
+            {
+                targets.erase(it_target++);
+                continue;
+            }
+
+        }
+        it_target++;
+    }
+
+#endif //PHUONGS_ALGORITHM
+#ifndef PHUONGS_ALGORITHM
     srand((unsigned)clock());
-    //add first target with random key
     if (targets.empty()) {
         int id;
         for (list<Region>::iterator it = regions.begin(); it != regions.end(); it++) {
-            while (id = rand(), targets.find(id) != targets.end());
-            targets[id] = Target();
-            targets[id].type = Target::TARGET_NEW;
-            targets[id].region = *it;
-            targets[id].times++;
+             while (id = rand(), targets.find(id) != targets.end());
+             targets[id] = Target();
+             targets[id].type = Target::TARGET_NEW;
+             targets[id].region = *it;
+             targets[id].times++;
         }
         return;
     }
@@ -569,6 +633,7 @@ void TargetExtractor::blobTrack(map<int, Target>& targets)
             }
         }
     }
+#endif
 }
 
 void TargetExtractor::extract(const Mat& frame, map<int, Target>& targets, bool track)
@@ -585,7 +650,7 @@ void TargetExtractor::extract(const Mat& frame, map<int, Target>& targets, bool 
      *     regionGrow: disable;
      */
 
-    movementDetect(-10);
+    movementDetect(mConfig._config.movDetect);
     int thresh = mConfig._config.brightThreshold;
     colorDetect(thresh,thresh,thresh);
 

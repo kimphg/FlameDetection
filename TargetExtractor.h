@@ -75,6 +75,7 @@ private:
     void accumulate(int threshold = 5);
     void blobTrack(map<int, Target>& targets);
     
+    void addNewTarget(map<int, Target>& targets,Region reg);
 public:
     TargetExtractor();
     const Mat& getMask() const {
