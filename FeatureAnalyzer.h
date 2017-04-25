@@ -21,7 +21,7 @@ private:
     Mat mGray;
     Mat mMask;
     double mArea;
-    
+
     static const int MAX_AREA_VEC_SIZE = 32;
     
     // if we use list here, we need to convert it to vector each time. so use vector instead.
@@ -34,26 +34,26 @@ private:
     void calcAreaVar();
     
 public:
-    static const int LEN = 20;
-    
+    static const int LEN = 10;
+    bool ready;
     // color features
-    double red[4];
-    double gray[4];
-    double saturation[4];
+    //double red[4];
+    //double gray[4];
+    //double saturation[4];
     
     // geometric features
     double circularity;
     double squareness;
     double aspectRatio;
     double roughness;
-    
+    double diffInOut;
     // structural features
     double texture[4];
     
     // dynamic features
     double frequency;
     double areaVar;
-    
+    double areaMeanStdDev;
     void calc(const Region& region, const Mat& frame);
     static void merge(const vector<const Feature*>& src, Feature& feature);
     operator Mat() const;

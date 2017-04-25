@@ -50,18 +50,19 @@ int VideoHandler::handle()
 //    mCapture.set(CV_CAP_PROP_FRAME_HEIGHT, mConfig._config.frmHeight);
 
 
-    while (true)
+    while (continueToDetect)
     {
         if (!mCapture.read(mFrame))
         {
             cout << (mFromCam ? "Camera disconnected." : "Video file ended.") << endl;
             break;
         }
-
-        namedWindow("original");
-        moveWindow("original", mConfig._config.frmPosX, mConfig._config.frmPosY);
-        resize(mFrame, mFrame, cvSize(mConfig._config.frmWidth, mConfig._config.frmHeight));
+        if (mFrame.empty()) continue;
+#ifdef MODE_GRAYSCALE
+        cv::cvtColor(mFrame,mFrame, CV_BGRA2GRAY);
+#endif
         imshow("original", mFrame);
+        resize(mFrame, mFrame, cvSize(mConfig._config.frmWidth, mConfig._config.frmHeight));
 
         if (mSaveVideo && !saveVideo())
         {
@@ -69,7 +70,7 @@ int VideoHandler::handle()
             mSaveVideo = false;
         }
 
-        if (continueToDetect)
+        if (true)//xu ly 3 frame 1 lan
         {
             if (mDetector.detect(mFrame))
             {
@@ -91,7 +92,6 @@ int VideoHandler::handle()
         {
             return STATUS_FLAME_DETECTED;
         }
-
 #ifdef TRAIN_MODE
         if (trainComplete) {
             cout << "Train complete." << endl;

@@ -53,6 +53,7 @@ private:
 
     Mat mFrame;
     Mat mMask;
+    Mat mEdge;
     queue<Mat> mMaskQueue;
     Mat mMaskSum;
     vector<ContourInfo> mContours;
@@ -67,7 +68,7 @@ private:
 #endif
     
     void movementDetect(double learningRate = -1);
-    void colorDetect(int redThreshold = 200, int greenThreshold = 200, int blueThreshold=200);
+    void colorDetect(int threshold = 220);
     void denoise(int ksize = 7, int threshold = 6);
     void fill(int ksize = 7, int threshold = 6);
     void regionGrow(int threshold = 20);
@@ -76,6 +77,7 @@ private:
     void blobTrack(map<int, Target>& targets);
     
     void addNewTarget(map<int, Target>& targets,Region reg);
+    void cotrastDetect(double mag);
 public:
     TargetExtractor();
     const Mat& getMask() const {

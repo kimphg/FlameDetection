@@ -25,7 +25,7 @@ FlameDecider::FlameDecider()
 {
     Feature feature;
     bool isFlame;
-    
+    // read the previous learning data from sample file
     ifstream ifs(SAMPLE_FILE);
     while (ifs >> feature >> isFlame) {
         mFeatureVec.push_back(feature);
@@ -58,7 +58,7 @@ void FlameDecider::userInput(const map<int, Target>& targets)
         if (it->second.lostTimes > 0) {
             continue;
         }
-        
+        if(!it->second.feature.ready)continue;
         const Feature& feature = it->second.feature;
         const Rectangle& rect = it->second.region.rect;
         
@@ -72,7 +72,7 @@ void FlameDecider::userInput(const map<int, Target>& targets)
                 case -1:    // no key pressed
                     rectangle(temp, rect, flag ? Scalar(0, 0, 255) : Scalar(0, 255, 0));
                     namedWindow("temp");
-                    moveWindow("temp", 350, 400);
+                    //moveWindow("temp", 350, 400);
                     imshow("temp", temp);
                     flag = !flag;
                     break;
@@ -155,8 +155,10 @@ void FlameDecider::train(const map<int, Target>& targets)
 #else
 inline bool FlameDecider::svmPredict(const Feature& feature)
 {
+    Mat tesst = Mat(feature);
+    tesst =tesst;
     float result = mSVM.predict(Mat(feature));
-    cout << "result: " << result << endl;
+    //cout << "result: " << result << endl;
 	return result == 1.0;
 }
 
@@ -169,6 +171,7 @@ bool FlameDecider::judge(map<int, Target>& targets)
     
     for (map<int, Target>::iterator it = targets.begin(); it != targets.end(); it++)
     {
+        if(it->second.times<200)continue;
         bool isFlame = svmPredict(it->second.feature);
         it->second.isFlame = isFlame;
         if (isFlame)
@@ -181,14 +184,16 @@ bool FlameDecider::judge(map<int, Target>& targets)
             getCurTime(fileName);
             fileName += ".jpg";
             cout << "Saving key frame to '" << fileName << "'." << endl;
-            imwrite(fileName, temp);
+            printf("times: %d\n",it->second.times);
+            imwrite("C:\\FlameDetector\\" +fileName, temp);
 
         }
     }
-    
+//#ifdef DEBUG_MODE
     namedWindow("result");
-    moveWindow("result", 350, 400);
+    moveWindow("result", 0, 0);
     imshow("result", temp);
+//#endif
     return flameDetected;
 }
 #endif

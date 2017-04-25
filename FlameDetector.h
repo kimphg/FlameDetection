@@ -13,7 +13,7 @@
 #include "TargetExtractor.h"
 #include "FeatureAnalyzer.h"
 #include "FlameDecider.h"
-
+#include "QSound"
 
 struct Target {
     static const int TARGET_EXISTING = 0;

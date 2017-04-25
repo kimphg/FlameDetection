@@ -27,11 +27,12 @@
 
 using namespace std;
 using namespace cv;
-
+#define PHUONGS_ALGORITHM
 //#define OLD_ALGO
 #define TRAIN_MODE
 //#define DEBUG_OUTPUT
-
+//#define DEBUG_MODE
+#define MODE_GRAYSCALE
 #ifdef TRAIN_MODE
 extern bool trainComplete;
 #endif

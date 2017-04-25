@@ -18,7 +18,7 @@ extern VideoHandler* videoHandler;
 void Feature::calcColorFeature()
 {
     // TODO: optimize this part, reduce extra work
-    
+    /*
     Mat hsv;
     cvtColor(mROI, hsv, CV_BGR2HSV_FULL);
     
@@ -41,7 +41,7 @@ void Feature::calcColorFeature()
         red[i] = stat[i][0];
         gray[i] = stat[i][1];
         saturation[i] = stat[i][2];
-    }
+    }*/
 }
 
 void Feature::calcGeometryFeature(const Region& region)
@@ -77,12 +77,32 @@ void Feature::calcGeometryFeature(const Region& region)
 
 void Feature::calcTexture(int levels, int dx, int dy)
 {
+
     assert(levels >= 2 && levels <= 256 && (levels & (levels - 1)) == 0);
     assert(dx >= 0 && dy >= 0 && dx + dy > 0);
     
     Mat temp;
     mGray.copyTo(temp);
-    
+#ifdef PHUONGS_ALGORITHM
+    double avrInside  = 0;
+    int countInside = 0;
+    double avrOutside  = 0;
+    for (int i = 0; i < temp.rows; i++) {
+        for (int j = 0; j < temp.cols; j++) {
+            if (mMask.at<uchar>(i, j) == 0) {
+                avrOutside+=temp.at<uchar>(i, j);
+            }
+            else
+            {
+                avrInside+=temp.at<uchar>(i, j);
+                countInside++;
+            }
+        }
+    }
+    avrInside/=countInside;
+    avrOutside/=(temp.rows*temp.cols-countInside);
+    diffInOut = avrInside-avrOutside;
+#endif
     // TODO: implement my own version of 'equalizeHist' which accepts mask as an argument
     double minVal;
     minMaxLoc(temp, &minVal, NULL, NULL, NULL, mMask);
@@ -153,6 +173,7 @@ void Feature::calcTexture(int levels, int dx, int dy)
     texture[1] = energy;
     texture[2] = contrast;
     texture[3] = homogenity;
+
 }
 
 void Feature::calcFrequency()
@@ -196,13 +217,14 @@ void Feature::calcAreaVar()
     
     if (mAreaVec.size() < MAX_AREA_VEC_SIZE) {
         areaVar = -1;
+        areaMeanStdDev = -1;
         return;
     }
     
     Scalar m, s;
     meanStdDev(mAreaVec, m, s);
     areaVar = s[0] / m[0];
-
+    areaMeanStdDev = s[0];
 #ifdef DEBUG_OUTPUT
     cout << "areaVar: " << areaVar << endl;
 #endif
@@ -211,7 +233,11 @@ void Feature::calcAreaVar()
 void Feature::calc(const Region& region, const Mat& frame)
 {
     mROI = frame(region.rect);
+#ifndef MODE_GRAYSCALE
     cvtColor(mROI, mGray, CV_BGR2GRAY);
+#else
+    mGray = mROI;
+#endif
     const Mat& mask = videoHandler->getDetector().getExtractor().getMask();
     mMask = mask(region.rect);
     mArea = 0;
@@ -220,17 +246,23 @@ void Feature::calc(const Region& region, const Mat& frame)
     for (vector<ContourInfo*>::const_iterator it = contours.begin(); it != contours.end(); it++) {
         mArea += (*it)->area;
     }
-    
-    calcColorFeature();
-    calcGeometryFeature(region);
-    calcTexture();
+
+
     
     if (mAreaVec.size() >= MAX_AREA_VEC_SIZE) {
         mAreaVec.erase(mAreaVec.begin());
+        calcColorFeature();
+        calcGeometryFeature(region);
+        calcTexture();
+        ready = true;
+    }
+    else
+    {
+        ready = false;
     }
     mAreaVec.push_back(mArea);
     
-    calcFrequency();
+    //calcFrequency();
     calcAreaVar();
 }
 
@@ -259,23 +291,41 @@ void Feature::merge(const vector<const Feature*>& src, Feature& feature)
 Feature::operator Mat() const
 {
     return (Mat_<float>(1, LEN) <<
-            red[0], red[1], red[2], red[3],
-            gray[0], gray[1], gray[2], gray[3],
-            saturation[0], saturation[1], saturation[2], saturation[3],
-            circularity, squareness, aspectRatio, roughness,
+//            red[0], red[1], red[2], red[3],
+//            gray[0], gray[1], gray[2], gray[3],
+//            saturation[0], saturation[1], saturation[2], saturation[3],
+            circularity, squareness, aspectRatio, roughness,areaMeanStdDev,diffInOut,
             texture[0], texture[1], texture[2], texture[3]);
 }
+/*
+        0.0684441   0.352894    0.269461 0.539347   665.499 44.5855     2.27866 0.00668438 21.6364 0.261937 0
+        0.17747     0.49296     0.791045 0.617529   370.907 25.1582     2.28684 0.00617608 20.8837 0.251204 0
+        0.0728507   0.389019    0.22619  0.559712   617.373 48.4005     2.25236 0.00671369 23.6601 0.250367 0
+        0.151407    0.561457    0.761194 0.575805   457.873 25.0511     2.22639 0.00729021 14.6032 0.301147 0
+        0.12807     0.389289    0.296875 0.655472   578.655 41.1841     2.29214 0.00609746 25.3556 0.258412 0
+        0.136834    0.442853    0.838235 0.581234   466.788 28.5133     2.23118 0.00716583 13.3224 0.303049 0
 
+
+
+
+        0.153457 0.55308    0.74701     0.515677    99.8568 75.127      2.12291 0.0128255 10.148  0.379672 1
+        0.183388 0.506102   0.802381    0.569849    99.5972 73.6027     2.11495 0.013334  8.7505  0.387453 1
+        0.208758 0.499534   0.881603    0.60266     86.6017 71.8819     2.09712 0.0134587 8.68596 0.394787 1
+        0.218334 0.545658   0.846196    0.606333    81.2897 72.1463     2.12898 0.0108633 9.62159 0.385817 1
+        0.254011 0.555027   0.736264    0.627839    75.7726 63.6343     2.17223 0.0093245 10.4298 0.353623 1
+        0.184303 0.537089   0.700842    0.545385    74.4444 71.0725     2.14625 0.0116139 10.8292 0.360753 1
+*/
 ifstream& operator>>(ifstream& ifs, Feature& feature)
 {
-    ifs >> feature.red[0] >> feature.red[1]
+    ifs /*>> feature.red[0] >> feature.red[1]
         >> feature.red[2] >> feature.red[3]
         >> feature.gray[0] >> feature.gray[1]
         >> feature.gray[2] >> feature.gray[3]
         >> feature.saturation[0] >> feature.saturation[1]
-        >> feature.saturation[2] >> feature.saturation[3]
+        >> feature.saturation[2] >> feature.saturation[3]*/
         >> feature.circularity >> feature.squareness
         >> feature.aspectRatio >> feature.roughness
+        >> feature.areaMeanStdDev   >>feature.diffInOut
         >> feature.texture[0] >> feature.texture[1]
         >> feature.texture[2] >> feature.texture[3];
     return ifs;
@@ -283,14 +333,15 @@ ifstream& operator>>(ifstream& ifs, Feature& feature)
 
 ofstream& operator<<(ofstream& ofs, const Feature& feature)
 {
-    ofs << feature.red[0] << " " << feature.red[1] << " "
+    ofs /*<< feature.red[0] << " " << feature.red[1] << " "
         << feature.red[2] << " " << feature.red[3] << " "
         << feature.gray[0] << " " << feature.gray[1] << " "
         << feature.gray[2] << " " << feature.gray[3] << " "
         << feature.saturation[0] << " " << feature.saturation[1] << " "
-        << feature.saturation[2] << " " << feature.saturation[3] << " "
+        << feature.saturation[2] << " " << feature.saturation[3] << " "*/
         << feature.circularity << " " << feature.squareness << " "
         << feature.aspectRatio << " " << feature.roughness << " "
+        << feature.areaMeanStdDev   << " " <<feature.diffInOut  << " "
         << feature.texture[0] << " " << feature.texture[1] << " "
         << feature.texture[2] << " " << feature.texture[3] << " ";
     return ofs;
@@ -377,7 +428,9 @@ void FeatureAnalyzer::analyze(const Mat& frame, map<int, Target>& targets)
     for (map<int, Target>::iterator it = targets.begin(); it != targets.end(); it++) {
         rectangle(temp, it->second.region.rect, Scalar(0, 255, 0));
     }
+#ifdef DEBUG_MODE
     namedWindow("frame");
-    moveWindow("frame", 10, 400);
+    moveWindow("frame", 10, 500);
     imshow("frame", temp);
+#endif
 }

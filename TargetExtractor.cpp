@@ -190,15 +190,23 @@ void TargetExtractor::movementDetect(double learningRate)
     mMOG.getBackgroundImage(mBackground);
 }
 
-void TargetExtractor::colorDetect(int redThreshold, int greenThreshold,int blueThreshold)
+void TargetExtractor::colorDetect(int threshold)
 {
 
-    Mat temp;
+    Mat temp ;//= mFrame;
     GaussianBlur(mFrame, temp, Size(3, 3), 0);
-
+#ifdef MODE_GRAYSCALE
+    for (uint i = 0; i < temp.rows; i++)
+    {
+        for (uint j = 0; j < temp.cols; j++)
+        {
+            mMask.at<uchar>(i, j) = (mFrame.at<uchar>(i,j)>threshold)?255:0;
+        }
+    }
+#else
     for (int i = 0; i < temp.rows; i++) {
         for (int j = 0; j < temp.cols; j++) {
-            if (mMask.at<uchar>(i, j) == 255) {
+            //if (mMask.at<uchar>(i, j) == 255) {
                 Vec3b& v = temp.at<Vec3b>(i, j);
                 //double s = 1 - 3.0 * min(v[0], min(v[1], v[2])) / (v[0] + v[1] + v[2]);
 //                if (!(v[2] > redThreshold
@@ -215,11 +223,45 @@ void TargetExtractor::colorDetect(int redThreshold, int greenThreshold,int blueT
                 {
                     mMask.at<uchar>(i, j) = 0;
                 }
+                else
+                {
+                    mMask.at<uchar>(i, j) = 255;
+                }
+            //}
+        }
+    }
+#endif
+}
+void TargetExtractor::cotrastDetect(double mag)
+{
+    Mat temp = mFrame;
+    Mat threshMat;
+    //GaussianBlur(mFrame, temp, Size(3, 3), 0);
+    medianBlur( mMask,mMask,15);
+    Canny(temp,threshMat, 100,200);
+    imshow("canny",threshMat);
+    imshow("maskcanny",mMask);
+    for (int i = 0; i < temp.rows; i++) {
+        for (int j = 0; j < temp.cols; j++) {
+            if (mMask.at<uchar>(i, j) > 0) {
+//                Vec3b& v = temp.at<Vec3b>(i, j);
+//                Vec3b& v1 = threshMat.at<Vec3b>(i, j);
+//                int value = (v[0]+v[1]+v[2]);
+//                int thresh = (v1[0]+v1[1]+v1[2]);
+//                if (!((value>thresh*mag)
+//                      &&(thresh>120)
+//                      ))
+//                {
+//                    mMask.at<uchar>(i, j) = 0;
+//                }
+                if(threshMat.at<uchar>(i, j)<200)
+                    mMask.at<uchar>(i, j) = 0;
+                else
+                    mMask.at<uchar>(i, j) = 255;
             }
         }
     }
 }
-
 void TargetExtractor::denoise(int ksize, int threshold)
 {
     int r = (ksize - 1) / 2;
@@ -369,9 +411,9 @@ void TargetExtractor::contoursAreaFilter(int smallThreshold, int largeThreshold,
         }
 
         Rect rect = boundingRect(Mat(contours[i]));
-        if (rect.width < 0.01 * mMask.cols && rect.height < 0.01 * mMask.rows) {
-            continue;
-        }
+//        if (rect.width < 0.01 * mMask.cols && rect.height < 0.01 * mMask.rows) {
+//            continue;
+//        }
 
         indexes.push_back(i);
         areas.push_back(area);
@@ -379,7 +421,7 @@ void TargetExtractor::contoursAreaFilter(int smallThreshold, int largeThreshold,
     }
 
     mMask = Mat::zeros(mMask.size(), mMask.type());
-    vector<ContourInfo>().swap(mContours);
+    vector<ContourInfo>().swap(mContours);//??
 
     if (areas.size() == 0) {
         return;
@@ -458,7 +500,8 @@ void TargetExtractor::addNewTarget(map<int, Target>& targets,Region reg)
     targets[id] = Target();
     targets[id].type = Target::TARGET_NEW;
     targets[id].region = reg;
-    targets[id].times++;
+    targets[id].times=1;
+    targets[id].lostTimes=0;
 }
 void TargetExtractor::blobTrack(map<int, Target>& targets)
 {
@@ -482,7 +525,7 @@ void TargetExtractor::blobTrack(map<int, Target>& targets)
             }
         }
     } while (regions.size() != lastRegionsSize);
-#define PHUONGS_ALGORITHM
+
 #ifdef PHUONGS_ALGORITHM
     // reset all targets
     for (map<int, Target>::iterator it_target = targets.begin();
@@ -510,6 +553,7 @@ void TargetExtractor::blobTrack(map<int, Target>& targets)
                 it_target->second.region = *it_reg;
                 it_target->second.times++;
                 it_target->second.type = Target::TARGET_EXISTING;
+                it_target->second.lostTimes = 0;
                 noMatch = false;
                 break;
             }
@@ -650,13 +694,16 @@ void TargetExtractor::extract(const Mat& frame, map<int, Target>& targets, bool 
      *     regionGrow: disable;
      */
 
-    movementDetect(mConfig._config.movDetect);
-    int thresh = mConfig._config.brightThreshold;
-    colorDetect(thresh,thresh,thresh);
+    //movementDetect(0.2);
+    mMask = cv::Mat::zeros(Size(mFrame.cols,mFrame.rows), CV_8UC1);
 
-    denoise(7, 5);
-    fill(7, 5);
-    medianBlur(mMask, mMask, 3);
+    //int thresh = mConfig._config.brightThreshold;
+    colorDetect(mConfig._config.brightThreshold);
+    //cotrastDetect(1.5);
+    imshow("mask", mMask);
+    //denoise(7, 5);
+    //fill(7, 5);
+    //medianBlur(mMask, mMask, 3);
 
     // TODO: make use of accumulate result
 
@@ -674,11 +721,11 @@ void TargetExtractor::extract(const Mat& frame, map<int, Target>& targets, bool 
 
     contoursAreaFilter(mConfig._config.smallArea, mConfig._config.largeArea, mConfig._config.keepCount);
 
-
-    namedWindow("mask");
-    moveWindow("mask", 350, 120);
-    imshow("mask", mMask);
-
+//#ifdef DEBUG_MODE
+    //namedWindow("mask");
+    //moveWindow("mask", 600, 10);
+    //imshow("mask", mMask);
+//#endif
     if (track) {
         blobTrack(targets);
     }
