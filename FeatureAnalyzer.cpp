@@ -46,10 +46,10 @@ void Feature::calcColorFeature()
 
 void Feature::calcGeometryFeature(const Region& region)
 {
-    circularity = 0;
-    squareness = 0;
-    aspectRatio = 0;
-    roughness = 0;
+    double new_circularity = 0;
+    double new_squareness = 0;
+    double new_aspectRatio = 0;
+    double new_roughness = 0;
     
     const vector<ContourInfo*>& contours = region.contours;
     for (vector<ContourInfo*>::const_iterator it = contours.begin(); it != contours.end(); it++) {
@@ -63,16 +63,20 @@ void Feature::calcGeometryFeature(const Region& region)
         double perimeterHull = arcLength(hull, true);
         double width = minRect.size.width, height = minRect.size.height;
         
-        circularity += area * (4 * 3.1416 * area / (perimeter * perimeter));
-        squareness  += area * (area / (width * height));
-        aspectRatio += area * (1.0 * min(width, height) / max(width, height));
-        roughness   += area * (perimeterHull / perimeter);
+        new_circularity += area * (4 * 3.1416 * area / (perimeter * perimeter));
+        new_squareness  += area * (area / (width * height));
+        new_aspectRatio += area * (1.0 * min(width, height) / max(width, height));
+        new_roughness   += area * (perimeterHull / perimeter);
     }
     
-    circularity /= mArea;
-    squareness  /= mArea;
-    aspectRatio /= mArea;
-    roughness   /= mArea;
+    new_circularity /= mArea;
+    new_squareness  /= mArea;
+    new_aspectRatio /= mArea;
+    new_roughness   /= mArea;
+    circularity +=(new_circularity-circularity)/10;
+    squareness +=(new_squareness-squareness)/10;
+    aspectRatio +=(new_aspectRatio-aspectRatio)/10;
+    roughness +=(new_roughness-roughness)/10;
 }
 
 void Feature::calcTexture(int levels, int dx, int dy)
@@ -101,7 +105,9 @@ void Feature::calcTexture(int levels, int dx, int dy)
     }
     avrInside/=countInside;
     avrOutside/=(temp.rows*temp.cols-countInside);
-    diffInOut = avrInside-avrOutside;
+    double new_diffInOut = avrInside-avrOutside;
+    diffInOut += (new_diffInOut-diffInOut)/10;
+
 #endif
     // TODO: implement my own version of 'equalizeHist' which accepts mask as an argument
     double minVal;
@@ -217,14 +223,14 @@ void Feature::calcAreaVar()
     
     if (mAreaVec.size() < MAX_AREA_VEC_SIZE) {
         areaVar = -1;
-        areaMeanStdDev = -1;
+        //areaMeanStdDev = -1;
         return;
     }
     
     Scalar m, s;
     meanStdDev(mAreaVec, m, s);
     areaVar = s[0] / m[0];
-    areaMeanStdDev = s[0];
+    //areaMeanStdDev = s[0];
 #ifdef DEBUG_OUTPUT
     cout << "areaVar: " << areaVar << endl;
 #endif
@@ -247,12 +253,12 @@ void Feature::calc(const Region& region, const Mat& frame)
         mArea += (*it)->area;
     }
 
-
+    calcColorFeature();
+    calcGeometryFeature(region);
     
     if (mAreaVec.size() >= MAX_AREA_VEC_SIZE) {
         mAreaVec.erase(mAreaVec.begin());
-        calcColorFeature();
-        calcGeometryFeature(region);
+
         calcTexture();
         ready = true;
     }
@@ -294,7 +300,7 @@ Feature::operator Mat() const
 //            red[0], red[1], red[2], red[3],
 //            gray[0], gray[1], gray[2], gray[3],
 //            saturation[0], saturation[1], saturation[2], saturation[3],
-            circularity, squareness, aspectRatio, roughness,areaMeanStdDev,diffInOut,
+            circularity, squareness, aspectRatio, roughness,areaVar,diffInOut,
             texture[0], texture[1], texture[2], texture[3]);
 }
 /*
@@ -325,7 +331,7 @@ ifstream& operator>>(ifstream& ifs, Feature& feature)
         >> feature.saturation[2] >> feature.saturation[3]*/
         >> feature.circularity >> feature.squareness
         >> feature.aspectRatio >> feature.roughness
-        >> feature.areaMeanStdDev   >>feature.diffInOut
+        >> feature.areaVar   >>feature.diffInOut
         >> feature.texture[0] >> feature.texture[1]
         >> feature.texture[2] >> feature.texture[3];
     return ifs;
@@ -341,7 +347,7 @@ ofstream& operator<<(ofstream& ofs, const Feature& feature)
         << feature.saturation[2] << " " << feature.saturation[3] << " "*/
         << feature.circularity << " " << feature.squareness << " "
         << feature.aspectRatio << " " << feature.roughness << " "
-        << feature.areaMeanStdDev   << " " <<feature.diffInOut  << " "
+        << feature.areaVar   << " " <<feature.diffInOut  << " "
         << feature.texture[0] << " " << feature.texture[1] << " "
         << feature.texture[2] << " " << feature.texture[3] << " ";
     return ofs;
