@@ -40,6 +40,7 @@ VideoHandler::VideoHandler(const string& file, bool saveKeyFrame)
 int VideoHandler::handle()
 {
     // The thread and the worker are created in the constructor so it is always safe to delete them.
+#ifdef MODE_MULTITHREAD
     m_thread = new QThread();
     m_worker = new VideoWork();
     m_worker->moveToThread(m_thread);
@@ -47,10 +48,11 @@ int VideoHandler::handle()
     QObject::connect(m_thread, SIGNAL(started()), m_worker, SLOT(doWork()));
     QObject::connect(m_worker, SIGNAL(finished()), m_thread, SLOT(quit()), Qt::DirectConnection);
 
-//    m_worker->abort();
-//    m_thread->wait();
-//    m_worker->requestWork();
-
+    m_worker->abort();
+    m_thread->wait();
+    m_worker->requestWork();
+    return 0;
+#endif
     if (!mCapture.isOpened()) {
         return STATUS_OPEN_CAP_FAILED;
     }

@@ -35,7 +35,7 @@ void VideoWork::abort()
 
 void VideoWork::doWork()
 {
-    VideoCapture mCapture("E:/My Works/ANTT/2017/VideoRecord/15.avi");
+    VideoCapture mCapture("D:/video/Example.asf");
     //"E:/My Works/ANTT/2017/VideoRecord/15.avi"
 
     bool continueToDetect = true;
@@ -98,7 +98,7 @@ void VideoWork::doWork()
                 break;
             }
 
-            waitKey(20);
+            waitKey(50);
            // phan code duoc bao ve
         }catch(...)
         {

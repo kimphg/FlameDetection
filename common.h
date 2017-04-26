@@ -28,6 +28,7 @@
 using namespace std;
 using namespace cv;
 #define PHUONGS_ALGORITHM
+//#define MODE_MULTITHREAD
 //#define OLD_ALGO
 #define TRAIN_MODE
 //#define DEBUG_OUTPUT
