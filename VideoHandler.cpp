@@ -39,6 +39,18 @@ VideoHandler::VideoHandler(const string& file, bool saveKeyFrame)
 
 int VideoHandler::handle()
 {
+    // The thread and the worker are created in the constructor so it is always safe to delete them.
+    m_thread = new QThread();
+    m_worker = new VideoWork();
+    m_worker->moveToThread(m_thread);
+    QObject::connect(m_worker, SIGNAL(workRequested()), m_thread, SLOT(start()));
+    QObject::connect(m_thread, SIGNAL(started()), m_worker, SLOT(doWork()));
+    QObject::connect(m_worker, SIGNAL(finished()), m_thread, SLOT(quit()), Qt::DirectConnection);
+
+//    m_worker->abort();
+//    m_thread->wait();
+//    m_worker->requestWork();
+
     if (!mCapture.isOpened()) {
         return STATUS_OPEN_CAP_FAILED;
     }
@@ -64,11 +76,11 @@ int VideoHandler::handle()
         imshow("original", mFrame);
         resize(mFrame, mFrame, cvSize(mConfig._config.frmWidth, mConfig._config.frmHeight));
 
-        if (mSaveVideo && !saveVideo())
-        {
-            cout << "Save video failed." << endl;
-            mSaveVideo = false;
-        }
+//        if (mSaveVideo && !saveVideo())
+//        {
+//            cout << "Save video failed." << endl;
+//            mSaveVideo = false;
+//        }
 
         if (true)//xu ly 3 frame 1 lan
         {

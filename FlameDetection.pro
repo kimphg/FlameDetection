@@ -17,7 +17,8 @@ SOURCES += main.cpp \
     FlameDecider.cpp \
     FlameDetector.cpp \
     TargetExtractor.cpp \
-    Config.cpp
+    Config.cpp \
+    videowork.cpp
 
 #INCLUDEPATH += $$PWD/../opencv/build/include
 INCLUDEPATH += "D:/OpenCV/OpenCV2411/build/include"
@@ -72,4 +73,5 @@ HEADERS += \
     FlameDecider.h \
     FlameDetector.h \
     TargetExtractor.h \
-    Config.h
+    Config.h \
+    videowork.h

@@ -58,6 +58,9 @@ public:
     static void merge(const vector<const Feature*>& src, Feature& feature);
     operator Mat() const;
 
+public:
+    Feature();
+
 #ifdef DEBUG_OUTPUT
     void printAreaVec() const;
 #endif

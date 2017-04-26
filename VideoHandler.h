@@ -13,6 +13,7 @@
 #include "utils.h"
 #include "FlameDetector.h"
 #include "Config.h"
+#include "videowork.h"
 
 class VideoHandler {
 private:
@@ -31,6 +32,9 @@ private:
     
     bool saveFrame();
     bool saveVideo();
+
+    QThread         *m_thread;
+    VideoWork       *m_worker;
     
 public:
     static const int STATUS_FLAME_DETECTED = 0;
