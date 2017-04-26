@@ -35,11 +35,12 @@ void VideoWork::abort()
 
 void VideoWork::doWork()
 {
-    VideoCapture mCapture("D:/video/Example.asf");
+    VideoCapture mCapture("E:/My Works/ANTT/2017/VideoRecord/15.avi");
     //"E:/My Works/ANTT/2017/VideoRecord/15.avi"
 
     bool continueToDetect = true;
     int extraFrameCount = 0;
+    Mat     mFrame;
 
     while(true)
     {
@@ -56,49 +57,55 @@ void VideoWork::doWork()
 
         try
         {
-            mCapture >> m_Frame;
-            if(m_Frame.empty())
+            mCapture >> mFrame;
+            if(mFrame.empty())
                 break;
-            namedWindow("original");
-            moveWindow("original", 0, 0);
-            resize(m_Frame, m_Frame, cvSize(400, 300));
-            imshow("original", m_Frame);
+//            namedWindow("original");
+//            moveWindow("original", 0, 0);
+            m_mutex.lock();
 
-            if (continueToDetect)
-            {
-                if (mDetector.detect(m_Frame))
-                {
-    //                if (mSaveKeyFrame && !saveFrame())
-    //                {
-    //                    cout << "Save key frame failed." << endl;
-    //                }
-    //                if (mSaveVideo)
-    //                {
-    //                    continueToDetect = false;
-    //                    continue;
-    //                }
+            m_Frame = mFrame.clone();
 
-                    cout << "Flame detected." << endl;
-                    //return STATUS_FLAME_DETECTED;
-                }
-            }
-            else if (++extraFrameCount >= 80)
-            {
-                return;
-            }
+            m_mutex.unlock();
 
-    #ifdef TRAIN_MODE
-            if (trainComplete) {
-                cout << "Train complete." << endl;
-                break;
-            }
-    #endif
-            if (waitKey(30) == 27) {
-                cout << "User abort." << endl;
-                break;
-            }
+ //           imshow("original", mFrame);
 
-            waitKey(50);
+
+//            if (continueToDetect)
+//            {
+//                if (mDetector.detect(m_Frame))
+//                {
+//    //                if (mSaveKeyFrame && !saveFrame())
+//    //                {
+//    //                    cout << "Save key frame failed." << endl;
+//    //                }
+//    //                if (mSaveVideo)
+//    //                {
+//    //                    continueToDetect = false;
+//    //                    continue;
+//    //                }
+
+//                    cout << "Flame detected." << endl;
+//                    //return STATUS_FLAME_DETECTED;
+//                }
+//            }
+//            else if (++extraFrameCount >= 80)
+//            {
+//                return;
+//            }
+
+//    #ifdef TRAIN_MODE
+//            if (trainComplete) {
+//                cout << "Train complete." << endl;
+//                break;
+//            }
+//    #endif
+//            if (waitKey(30) == 27) {
+//                cout << "User abort." << endl;
+//                break;
+//            }
+
+            waitKey(40);
            // phan code duoc bao ve
         }catch(...)
         {

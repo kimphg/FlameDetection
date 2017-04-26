@@ -39,6 +39,10 @@ VideoHandler::VideoHandler(const string& file, bool saveKeyFrame)
 
 int VideoHandler::handle()
 {
+
+    bool continueToDetect = true;
+    int extraFrameCount = 0;
+
     // The thread and the worker are created in the constructor so it is always safe to delete them.
 #ifdef MODE_MULTITHREAD
     m_thread = new QThread();
@@ -51,17 +55,14 @@ int VideoHandler::handle()
     m_worker->abort();
     m_thread->wait();
     m_worker->requestWork();
+
+
+
     return 0;
 #endif
     if (!mCapture.isOpened()) {
         return STATUS_OPEN_CAP_FAILED;
     }
-
-    bool continueToDetect = true;
-    int extraFrameCount = 0;
-
-//    mCapture.set(CV_CAP_PROP_FRAME_WIDTH, mConfig._config.frmWidth);
-//    mCapture.set(CV_CAP_PROP_FRAME_HEIGHT, mConfig._config.frmHeight);
 
 
     while (continueToDetect)
@@ -71,7 +72,10 @@ int VideoHandler::handle()
             cout << (mFromCam ? "Camera disconnected." : "Video file ended.") << endl;
             break;
         }
+
+        mFrame = m_worker->m_Frame.clone();
         if (mFrame.empty()) continue;
+
 #ifdef MODE_GRAYSCALE
         cv::cvtColor(mFrame,mFrame, CV_BGRA2GRAY);
 #endif
