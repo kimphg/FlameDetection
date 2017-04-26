@@ -171,14 +171,13 @@ bool FlameDecider::judge(map<int, Target>& targets)
     
     for (map<int, Target>::iterator it = targets.begin(); it != targets.end(); it++)
     {
-        if(it->second.times<200)continue;
+        if(it->second.times<100)continue;
         bool isFlame = svmPredict(it->second.feature);
         it->second.isFlame = isFlame;
         if (isFlame)
         {
             flameDetected = true;
             rectangle(temp, it->second.region.rect, Scalar(0, 255, 0));
-
             // save detected frame to jpg
             string fileName;
             getCurTime(fileName);
@@ -186,7 +185,6 @@ bool FlameDecider::judge(map<int, Target>& targets)
             cout << "Saving key frame to '" << fileName << "'." << endl;
             printf("times: %d\n",it->second.times);
             imwrite("C:\\FlameDetector\\" +fileName, temp);
-
         }
     }
 //#ifdef DEBUG_MODE

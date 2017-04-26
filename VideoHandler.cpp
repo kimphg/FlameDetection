@@ -63,8 +63,10 @@ int VideoHandler::handle()
 //    mCapture.set(CV_CAP_PROP_FRAME_WIDTH, mConfig._config.frmWidth);
 //    mCapture.set(CV_CAP_PROP_FRAME_HEIGHT, mConfig._config.frmHeight);
 
+    QSound sound("alarm.wav");
+    sound.setLoops(10);
 
-    while (continueToDetect)
+    while (true)
     {
         if (!mCapture.read(mFrame))
         {
@@ -98,6 +100,7 @@ int VideoHandler::handle()
 //                    continue;
 //                }
 
+                if(sound.isFinished())sound.play();
                 cout << "Flame detected." << endl;
                 //return STATUS_FLAME_DETECTED;
             }
