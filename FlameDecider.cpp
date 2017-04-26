@@ -58,7 +58,7 @@ void FlameDecider::userInput(const map<int, Target>& targets)
         if (it->second.lostTimes > 0) {
             continue;
         }
-        if(!it->second.feature.ready)continue;
+        if(!it->second.feature.dataReady)continue;
         const Feature& feature = it->second.feature;
         const Rectangle& rect = it->second.region.rect;
         

@@ -26,16 +26,16 @@ private:
     
     // if we use list here, we need to convert it to vector each time. so use vector instead.
     vector<double> mAreaVec;
-    
+    vector<double> aspectRatioVec;
     void calcColorFeature();
     void calcGeometryFeature(const Region& region);
     void calcTexture(int levels = 16, int dx = 3, int dy = 3);
     void calcFrequency();
-    void calcAreaVar();
+    void calcDynamicFeatures();
     
 public:
-    static const int LEN = 10;
-    bool ready;
+    static const int LEN = 11;
+    bool dataReady;
     // color features
     //double red[4];
     //double gray[4];
@@ -44,16 +44,16 @@ public:
     // geometric features
     double circularity;
     double squareness;
-    double aspectRatio;
     double roughness;
     double diffInOut;
     // structural features
     double texture[4];
     
     // dynamic features
+    double aspectRatioMean;
+    double aspectRatioVar;
     double frequency;
     double areaVar;
-    double areaMeanStdDev;
     void calc(const Region& region, const Mat& frame);
     static void merge(const vector<const Feature*>& src, Feature& feature);
     operator Mat() const;

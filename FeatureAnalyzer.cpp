@@ -48,7 +48,7 @@ void Feature::calcGeometryFeature(const Region& region)
 {
     double new_circularity = 0;
     double new_squareness = 0;
-    double new_aspectRatio = 0;
+    //double new_aspectRatio = 0;
     double new_roughness = 0;
     
     const vector<ContourInfo*>& contours = region.contours;
@@ -65,17 +65,17 @@ void Feature::calcGeometryFeature(const Region& region)
         
         new_circularity += area * (4 * 3.1416 * area / (perimeter * perimeter));
         new_squareness  += area * (area / (width * height));
-        new_aspectRatio += area * (1.0 * min(width, height) / max(width, height));
+        //new_aspectRatio += area * (1.0 * min(width, height) / max(width, height));
         new_roughness   += area * (perimeterHull / perimeter);
     }
     
     new_circularity /= mArea;
     new_squareness  /= mArea;
-    new_aspectRatio /= mArea;
+    //new_aspectRatio /= mArea;
     new_roughness   /= mArea;
     circularity +=(new_circularity-circularity)/10;
     squareness +=(new_squareness-squareness)/10;
-    aspectRatio +=(new_aspectRatio-aspectRatio)/10;
+    //aspectRatioMean +=(new_aspectRatio-aspectRatioMean)/10;
     roughness +=(new_roughness-roughness)/10;
 }
 
@@ -87,28 +87,6 @@ void Feature::calcTexture(int levels, int dx, int dy)
     
     Mat temp;
     mGray.copyTo(temp);
-#ifdef PHUONGS_ALGORITHM
-    double avrInside  = 0;
-    int countInside = 0;
-    double avrOutside  = 0;
-    for (int i = 0; i < temp.rows; i++) {
-        for (int j = 0; j < temp.cols; j++) {
-            if (mMask.at<uchar>(i, j) == 0) {
-                avrOutside+=temp.at<uchar>(i, j);
-            }
-            else
-            {
-                avrInside+=temp.at<uchar>(i, j);
-                countInside++;
-            }
-        }
-    }
-    avrInside/=countInside;
-    avrOutside/=(temp.rows*temp.cols-countInside);
-    double new_diffInOut = avrInside-avrOutside;
-    diffInOut += (new_diffInOut-diffInOut)/10;
-
-#endif
     // TODO: implement my own version of 'equalizeHist' which accepts mask as an argument
     double minVal;
     minMaxLoc(temp, &minVal, NULL, NULL, NULL, mMask);
@@ -217,30 +195,58 @@ void Feature::calcFrequency()
 #endif
 }
 
-void Feature::calcAreaVar()
+void Feature::calcDynamicFeatures()
 {
-    // TODO: optimize this part
-    
-    if (mAreaVec.size() < MAX_AREA_VEC_SIZE) {
-        areaVar = -1;
-        //areaMeanStdDev = -1;
-        return;
+    //diffInOut
+    double avrInside  = 0;
+    int countInside = 0;
+    double avrOutside  = 0;
+    for (int i = 0; i < mGray.rows; i++) {
+        for (int j = 0; j < mGray.cols; j++) {
+            if (mMask.at<uchar>(i, j) == 0) {
+                avrOutside+=mGray.at<uchar>(i, j);
+            }
+            else
+            {
+                avrInside+=mGray.at<uchar>(i, j);
+                countInside++;
+            }
+        }
     }
-    
-    Scalar m, s;
-    meanStdDev(mAreaVec, m, s);
-    areaVar = s[0] / m[0];
-    //areaMeanStdDev = s[0];
-#ifdef DEBUG_OUTPUT
-    cout << "areaVar: " << areaVar << endl;
-#endif
+    avrInside/=countInside;
+    avrOutside/=(mGray.rows*mGray.cols-countInside);
+    double new_diffInOut = avrInside-avrOutside;
+    diffInOut += (new_diffInOut-diffInOut)/10.0;
+    //area
+    if (mAreaVec.size() < MAX_AREA_VEC_SIZE) {
+        dataReady = false;
+    }
+    else
+    {
+        Scalar m, s;
+        meanStdDev(mAreaVec, m, s);
+        areaVar = s[0] / m[0];
+    }
+    //
+    if(aspectRatioVec.size()>=MAX_AREA_VEC_SIZE)
+    {
+        Scalar m, s;
+        meanStdDev(aspectRatioVec, m, s);
+        aspectRatioVar = s[0] / m[0];
+        aspectRatioMean = m[0];
+    }
+    else
+    {
+        dataReady = false;
+    }
+
 }
 
 Feature::Feature()
 {
     circularity=0;
     squareness=0;
-    aspectRatio=0;
+    aspectRatioMean=0;
     roughness=0;
     diffInOut=0;
     frequency=0;
@@ -268,19 +274,24 @@ void Feature::calc(const Region& region, const Mat& frame)
     calcGeometryFeature(region);
     
     if (mAreaVec.size() >= MAX_AREA_VEC_SIZE) {
-        mAreaVec.erase(mAreaVec.begin());
-
+        dataReady = true;
+        calcDynamicFeatures();
         calcTexture();
-        ready = true;
+        mAreaVec.erase(mAreaVec.begin());
+        aspectRatioVec.erase(aspectRatioVec.begin());
     }
     else
     {
-        ready = false;
+        dataReady = false;
     }
+
+    //
+    double aspectRatio = ((double)region.rect.width)/region.rect.height;
+    assert(aspectRatio>0);
+    aspectRatioVec.push_back(aspectRatio);
     mAreaVec.push_back(mArea);
-    
     //calcFrequency();
-    calcAreaVar();
+
 }
 
 void Feature::merge(const vector<const Feature*>& src, Feature& feature)
@@ -311,54 +322,11 @@ Feature::operator Mat() const
 //            red[0], red[1], red[2], red[3],
 //            gray[0], gray[1], gray[2], gray[3],
 //            saturation[0], saturation[1], saturation[2], saturation[3],
-            circularity, squareness, aspectRatio, roughness,areaVar,diffInOut,
+            circularity, squareness, aspectRatioMean, aspectRatioVar,
+            roughness, areaVar, diffInOut,
             texture[0], texture[1], texture[2], texture[3]);
 }
-/*
-0.225679 0.621564 0.683939 0.595304 0.0426069 10.6425 2.23783 0.00767549 15.8705 0.319143 0
-0.212579 0.610313 0.657886 0.588981 0.0436852 18.6286 2.24482 0.00749072 16.4075 0.314524 0
 
-0.11348 0.529981 0.367314 0.526054 0.145431 44.0843 2.26172 0.00677292 19.1694 0.260525 0
-0.110111 0.512849 0.326862 0.540649 0.143896 48.0901 2.3017 0.0060758 20.6976 0.258765 0
-0.268385 0.512409 0.625367 0.669439 0.222379 2.15528 2.22599 0.00752643 20.5399 0.280366 0
-
-0.109066 0.364066 0.337469 0.617353 0.230319 39.8793 2.31342 0.00573753 27.7838 0.236201 0
-0.111655 0.432216 0.76718 0.510079 0.306986 25.6209 2.30982 0.00597598 26.8203 0.266877 0
-0.104498 0.349127 0.359052 0.605848 0.200261 38.9046 2.31457 0.0057017 27.4154 0.241347 0
-0.0913013 0.388416 0.810138 0.487751 0.244727 29.4235 2.29637 0.0067215 25.0286 0.275339 0
-
-0.0820308 0.368375 0.805901 0.480071    0.166681 31.1757 2.24107 0.00766098 14.8116 0.309657 0
-0.111956 0.354679 0.304951 0.641406     0.13134 36.7685 2.29129 0.00621622 29.3734 0.238853 0
-0.0968052 0.375595 0.823178 0.515083    0.143599 30.1015 2.2091 0.00767414 13.79 0.298751 0
-0.115631 0.356416 0.302699 0.650743     0.143699 34.7197 2.33154 0.00541361 32.4832 0.19958 0
-0.108057 0.398418 0.887319 0.534987     0.128549 28.936 2.17757 0.00850535 11.5944 0.333365 0
-0.10553 0.346207 0.302615 0.629115      0.155707 32.8738 2.32783 0.00548159 30.1264 0.20797 0
-0.168371 0.341471 0.941088 0.676576     0.104627 38.6931 2.16416 0.00968045 11.0009 0.336037 0
-0.0732417 0.272483 0.428661 0.544335    0.115197 29.7413 2.35167 0.00498787 35.4028 0.197585 0
-0.186151 0.376504 0.952085 0.677864     0.0705175 35.9811 2.17208 0.00888694 9.64094 0.372929 0
-0.0721759 0.284799 0.391608 0.543084    0.120215 29.0296 2.33033 0.0053518 32.793 0.205224 0
-0.207634 0.398882 0.944696 0.696231     0.063132 33.8767 2.14288 0.00940555 10.2148 0.346597 0
-
-0.185884 0.55598 0.741256 0.55555       0.0535428 65.9839  2.13146 0.0125267 10.2167 0.40291 1
-0.214109 0.556452 0.686131 0.597021     0.039062 70.2287 2.14779 0.00988294 9.25978 0.378577 1
-0.216474 0.541828 0.696821 0.605822     0.0264021 73.992 2.10584 0.0148444 9.01753 0.394002 1
-0.229498 0.533143 0.672069 0.625877     0.0355498 76.3203 2.14521 0.010975 9.65087 0.373557 1
-0.270906 0.549181 0.626591 0.669713     0.0414438 76.7153 2.12957 0.0122567 9.99602 0.398517 1
-0.276261 0.560143 0.630591 0.669773     0.0449739 75.8957 2.16714 0.0113331 10.939 0.383929 1
-0.240264 0.555957 0.693162 0.622345     0.0458402 75.3957 2.13336 0.012241 11.0225 0.383023 1
-0.23571 0.549984 0.653938 0.62548       0.0463237 77.1557 2.11554 0.0112645 9.33507 0.403924 1
-0.246454 0.553963 0.583566 0.650469     0.03706 77.1586 2.13898 0.0113622 9.9155 0.37636 1
-0.225535 0.548682 0.641151 0.618743     0.0274363 74.6745 2.14111 0.0104251 10.8478 0.344294 1
-0.209729 0.544063 0.712305 0.591944 0.0298222 72.7906 2.12559 0.0123053 9.9033 0.366714 1
-0.246269 0.556743 0.684674 0.628461 0.0312892 71.1051 2.14934 0.0120117 10.9821 0.378316 1
-0.284551 0.569814 0.636551 0.66954 0.0303267 70.773 2.11735 0.012838 9.92028 0.396432 1
-0.229601 0.557188 0.681085 0.605337 0.0297539 72.2021 2.12291 0.0128255 10.148 0.379672 1
-0.203273 0.540991 0.719245 0.580493 0.0296397 73.6732 2.11495 0.013334 8.7505 0.387453 1
-0.203172 0.522826 0.778743 0.587266 0.0256674 73.6477 2.09712 0.0134587 8.68596 0.394787 1
-0.210892 0.533018 0.801738 0.597938 0.0241677 73.3626 2.12898 0.0108633 9.62159 0.385817 1
-0.230279 0.545376 0.791285 0.613217 0.0225946 69.5605 2.17223 0.0093245 10.4298 0.353623 1
-0.220817 0.544534 0.759591 0.596582 0.0220779 69.1659 2.14625 0.0116139 10.8292 0.360753 1
-*/
 ifstream& operator>>(ifstream& ifs, Feature& feature)
 {
     ifs /*>> feature.red[0] >> feature.red[1]
@@ -368,7 +336,7 @@ ifstream& operator>>(ifstream& ifs, Feature& feature)
         >> feature.saturation[0] >> feature.saturation[1]
         >> feature.saturation[2] >> feature.saturation[3]*/
         >> feature.circularity >> feature.squareness
-        >> feature.aspectRatio >> feature.roughness
+        >> feature.aspectRatioMean >> feature.aspectRatioVar>> feature.roughness
         >> feature.areaVar   >>feature.diffInOut
         >> feature.texture[0] >> feature.texture[1]
         >> feature.texture[2] >> feature.texture[3];
@@ -384,13 +352,34 @@ ofstream& operator<<(ofstream& ofs, const Feature& feature)
         << feature.saturation[0] << " " << feature.saturation[1] << " "
         << feature.saturation[2] << " " << feature.saturation[3] << " "*/
         << feature.circularity << " " << feature.squareness << " "
-        << feature.aspectRatio << " " << feature.roughness << " "
+        << feature.aspectRatioMean << " " << feature.aspectRatioVar << " "
+        <<feature.roughness << " "
         << feature.areaVar   << " " <<feature.diffInOut  << " "
         << feature.texture[0] << " " << feature.texture[1] << " "
         << feature.texture[2] << " " << feature.texture[3] << " ";
     return ofs;
 }
-
+/*
+0.376236 0.579736 0.513485 0.0910183 0.813084 0.305358 73.688 2.22974 0.00704165 31.5547 0.218125 0
+0.146479 0.388543 1.11473  0.182059  0.579836 0.0988645 27.8445 2.10784 0.00952845 32.3658 0.250229 0
+0.371029 0.577988 0.507817 0.0931047 0.813959 0.274086 74.4943 2.18191 0.00808991 30.7078 0.225462 0
+0.189852 0.41968  1.14693  0.161657  0.619627 0.131024 28.0261 1.99812 0.0122217 28.8341 0.271016 0
+0.350039 0.564893 0.502369 0.0950097 0.799442 0.21847 74.1376 2.16718 0.00834711 28.9864 0.233482 0
+0.272545 0.479264 1.21994  0.117834  0.686729 0.145392 27.1445 1.85162 0.0223736 30.9083 0.274067 0
+0.340137 0.558099 0.488392 0.0365847 0.789955 0.145111 73.1101 2.13342 0.00878906 40.9821 0.20408 0
+0.304672 0.565968 0.371253 0.291883  0.878537 0.364841 2.77255 1.87405 0.0149382 46.0678 0.146106 0
+0.421152 0.610712 0.601029 0.0886085 0.822567 0.0836591 42.6385 2.17346 0.0126956 14.2288 0.327626 1
+0.392236 0.605773 0.62375  0.100317 0.799903  0.0575647 41.2139 2.08572 0.0135286 12.7289 0.339164 1
+0.36889  0.595184 0.64408  0.115661 0.786545  0.0552047 41.1443 2.16481 0.0109562 11.6146 0.353305 1
+0.338972 0.580727 0.66354  0.122792 0.765669  0.0536064 43.2742 2.16091 0.0107671 11.088 0.36958 1
+0.355878 0.596067 0.691116 0.11311 0.772909   0.0483589 45.8656 2.08963 0.0153151 12.8132 0.399619 1
+0.376996 0.601943 0.713038 0.0933031 0.793195 0.036363  48.5858 2.12739 0.0104317 14.3288 0.357296 1
+0.36307  0.599245 0.728717 0.0688098 0.787554 0.039321  51.0018 2.13176 0.0130141 12.9171 0.336676 1
+0.390317 0.608434 0.722001 0.0663886 0.803991 0.0484484 50.6438 2.06871 0.0131221 13.93 0.345771 1
+0.414343 0.619932 0.711253 0.0780828 0.815157 0.0512223 50.9703 2.13184 0.0148702 14.0961 0.350149 1
+0.407949 0.627968 0.68979  0.0929591 0.80643 0.0510396  51.2765 2.04448 0.0144487 15.1534 0.36553 1
+0.387897 0.628299 0.669363 0.0980457 0.79047 0.05528    49.9149 2.12136 0.0112172 14 0.351546 1
+0.355606 0.617249 0.641014 0.0817144 0.768587 0.0553125 49.245 2.08098 0.0120907 13.8757 0.343086 1*/
 #ifdef DEBUG_OUTPUT
 void Feature::printAreaVec() const
 {
