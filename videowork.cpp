@@ -35,11 +35,12 @@ void VideoWork::abort()
 
 void VideoWork::doWork()
 {
-    //VideoCapture mCapture("rtsp://192.168.0.253:554/stream1");
-    VideoCapture mCapture("E:/My Works/ANTT/2017/VideoRecord/15.avi");
+//    VideoCapture mCapture("rtsp://192.168.0.253:554/stream1");
+    VideoCapture mCapture(mConfig._config.strCamUrl);
+//    VideoCapture mCapture("E:/My Works/ANTT/2017/VideoRecord/15.avi");
     Mat mFrame;    
-    Rect mROI(mConfig._config.cropX, mConfig._config.cropY, mConfig._config.frmWidth - (2*mConfig._config.cropX),
-                 mConfig._config.frmHeight - (2*mConfig._config.cropY));
+//    Rect mROI(mConfig._config.cropX, mConfig._config.cropY, mConfig._config.frmWidth - (2*mConfig._config.cropX),
+//                 mConfig._config.frmHeight - (2*mConfig._config.cropY));
     m_IsFinished = false;
 
     if (!mCapture.isOpened())
@@ -53,7 +54,7 @@ void VideoWork::doWork()
         m_mutex.unlock();
 
         emit finished();
-    }
+    }    
 
     while(true)
     {
@@ -82,18 +83,21 @@ void VideoWork::doWork()
                 break;
             }
 
-            imshow("original", mFrame);
 
-#ifdef MODE_GRAYSCALE
-            cv::cvtColor(mFrame,mFrame, CV_BGRA2GRAY);
-#endif
-            resize(mFrame, mFrame, cvSize(mConfig._config.frmWidth, mConfig._config.frmHeight));
+//#ifdef MODE_GRAYSCALE
+//            cv::cvtColor(mFrame,mFrame, CV_BGRA2GRAY);
+//#endif
 
-            mFrame = mFrame(mROI);
+
+
+//            mFrame = mFrame(mROI);
 
             m_mutex.lock();
-            mFrame.copyTo(m_Frame);
+            //mFrame.copyTo(m_Frame);
+            resize(mFrame, m_Frame, cvSize(mConfig._config.frmWidth, mConfig._config.frmHeight));
             m_mutex.unlock();
+            resize(mFrame, mFrame, cvSize(mConfig._config.frmWidth, mConfig._config.frmHeight));
+            imshow("original", mFrame);
 
             waitKey(40);
            // phan code duoc bao ve

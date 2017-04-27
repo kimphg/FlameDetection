@@ -8,6 +8,8 @@
 
 #include "FlameDetector.h"
 
+extern CConfig mConfig;
+
 FlameDetector::FlameDetector()
 : mFrameCount(0)
 , mFlameCount(0)
@@ -36,6 +38,8 @@ bool FlameDetector::detect(const Mat& frame)
         if (result)
         {
             mFlameCount++;
+            m_Rect = Rect(mDecider.m_Rect.x + mConfig._config.cropX, mDecider.m_Rect.y + mConfig._config.cropY,
+                          mDecider.m_Rect.width, mDecider.m_Rect.height);
 //            QSound sound("alarm.wav");
 //            sound.play();
         }

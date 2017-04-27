@@ -32,6 +32,8 @@ struct Target {
 
 
 class FlameDetector {
+public:
+    Rect m_Rect;
 private:
     static const int SKIP_FRAME_COUNT = 20;
     

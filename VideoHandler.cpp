@@ -26,6 +26,9 @@ int VideoHandler::handle()
     bool continueToDetect = true;
     int extraFrameCount = 0;
 
+    Rect mROI(mConfig._config.cropX, mConfig._config.cropY, mConfig._config.frmWidth - (2*mConfig._config.cropX),
+                 mConfig._config.frmHeight - (2*mConfig._config.cropY));
+
     QSound sound("alarm.wav");
     sound.setLoops(5);
 
@@ -46,9 +49,15 @@ int VideoHandler::handle()
 
     while (continueToDetect)
     {
-        m_worker->m_Frame.copyTo(mFrame);
-        if (mFrame.empty())
+        m_worker->m_Frame.copyTo(mOrgFrame);
+        if (mOrgFrame.empty())
             continue;
+
+#ifdef MODE_GRAYSCALE
+            cv::cvtColor(mOrgFrame, mFrame, CV_BGRA2GRAY);
+#endif
+
+            mFrame = mFrame(mROI);
 
         if (m_worker->m_IsFinished)
             return 0;
@@ -57,11 +66,15 @@ int VideoHandler::handle()
         {
             if (mDetector.detect(mFrame))
             {
+                saveFrame();
                 if (sound.isFinished())
                     sound.play();
                 cout << "Flame detected." << endl;
                 //return STATUS_FLAME_DETECTED;
             }
+            //    namedWindow("result");
+            //    moveWindow("result", 0, 0);
+            imshow("result", mOrgFrame);
         }
         else if (++extraFrameCount >= MAX_EXTRA_FRAME_COUNT)
         {
@@ -88,35 +101,39 @@ int VideoHandler::handle()
         return STATUS_OPEN_CAP_FAILED;
     }
 
-    Rect mROI(mConfig._config.cropX, mConfig._config.cropY, mConfig._config.frmWidth - (2*mConfig._config.cropX),
-                 mConfig._config.frmHeight - (2*mConfig._config.cropY));
-
     while (continueToDetect)
     {
-        if (!mCapture.read(mFrame))
+        if (!mCapture.read(mOrgFrame))
         {
             cout << (mFromCam ? "Camera disconnected." : "Video file ended.") << endl;
             break;
         }
 
+        resize(mOrgFrame, mOrgFrame, cvSize(mConfig._config.frmWidth, mConfig._config.frmHeight));
+        imshow("original", mOrgFrame);
+
 #ifdef MODE_GRAYSCALE
-        cv::cvtColor(mFrame,mFrame, CV_BGRA2GRAY);
+        cv::cvtColor(mOrgFrame,mFrame, CV_BGRA2GRAY);
 #endif
-        resize(mFrame, mFrame, cvSize(mConfig._config.frmWidth, mConfig._config.frmHeight));
 
         mFrame = mFrame(mROI);
-        imshow("original", mFrame);
+
 
         if (true)//xu ly 3 frame 1 lan
         {
+
             if (mDetector.detect(mFrame))
             {
+                saveFrame();
 
                 if (sound.isFinished())
                     sound.play();
                 cout << "Flame detected." << endl;
                 //return STATUS_FLAME_DETECTED;
             }
+
+            imshow("result", mOrgFrame);
+
         }
         else if (++extraFrameCount >= MAX_EXTRA_FRAME_COUNT)
         {
@@ -138,11 +155,13 @@ int VideoHandler::handle()
 }
 
 bool VideoHandler::saveFrame()
-{
+{   
+    rectangle(mOrgFrame, mDetector.m_Rect, Scalar(0, 255, 0));
+    // save detected frame to jpg
     string fileName;
     getCurTime(fileName);
     fileName += ".jpg";
     cout << "Saving key frame to '" << fileName << "'." << endl;
-
-    return imwrite(fileName, mFrame);
+    //printf("times: %d\n",it->second.times);
+    return imwrite("C:\\FlameDetector\\" +fileName, mOrgFrame);
 }

@@ -16,6 +16,8 @@ class Feature;
 
 
 class FlameDecider {
+public:
+    Rect m_Rect;
 private:
     static const string SVM_DATA_FILE;
     

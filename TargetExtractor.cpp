@@ -700,7 +700,7 @@ void TargetExtractor::extract(const Mat& frame, map<int, Target>& targets, bool 
     //int thresh = mConfig._config.brightThreshold;
     colorDetect(mConfig._config.brightThreshold);
     //cotrastDetect(1.5);
-    imshow("mask", mMask);
+    //imshow("mask", mMask);
     //denoise(7, 5);
     //fill(7, 5);
     //medianBlur(mMask, mMask, 3);

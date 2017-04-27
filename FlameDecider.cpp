@@ -166,8 +166,8 @@ bool FlameDecider::judge(map<int, Target>& targets)
 {
     bool flameDetected = false;
     
-    Mat temp;
-    mFrame.copyTo(temp);    
+//    Mat temp;
+//    mFrame.copyTo(temp);
     
     for (map<int, Target>::iterator it = targets.begin(); it != targets.end(); it++)
     {
@@ -177,22 +177,25 @@ bool FlameDecider::judge(map<int, Target>& targets)
         if (isFlame)
         {
             flameDetected = true;
-            rectangle(temp, it->second.region.rect, Scalar(0, 255, 0));
+            m_Rect = it->second.region.rect;
 
-            // save detected frame to jpg
-            string fileName;
-            getCurTime(fileName);
-            fileName += ".jpg";
-            cout << "Saving key frame to '" << fileName << "'." << endl;
-            printf("times: %d\n",it->second.times);
-            imwrite("C:\\FlameDetector\\" +fileName, temp);
+
+//            rectangle(temp, it->second.region.rect, Scalar(0, 255, 0));
+//            // save detected frame to jpg
+//            string fileName;
+//            getCurTime(fileName);
+//            fileName += ".jpg";
+//            cout << "Saving key frame to '" << fileName << "'." << endl;
+//            printf("times: %d\n",it->second.times);
+//            imwrite("C:\\FlameDetector\\" +fileName, temp);
+
 
         }
     }
 //#ifdef DEBUG_MODE
-    namedWindow("result");
-    moveWindow("result", 0, 0);
-    imshow("result", temp);
+//    namedWindow("result");
+//    moveWindow("result", 0, 0);
+//    imshow("result", temp);
 //#endif
     return flameDetected;
 }
