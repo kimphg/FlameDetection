@@ -5,7 +5,7 @@
 #include <QThread>
 #include <QDebug>
 
-
+extern CConfig mConfig;
 
 VideoWork::VideoWork(QObject *parent) : QObject(parent)
 {
@@ -35,11 +35,25 @@ void VideoWork::abort()
 
 void VideoWork::doWork()
 {
-    VideoCapture mCapture("D:/video/Example.asf");
-    //"E:/My Works/ANTT/2017/VideoRecord/15.avi"
+    //VideoCapture mCapture("rtsp://192.168.0.253:554/stream1");
+    VideoCapture mCapture("E:/My Works/ANTT/2017/VideoRecord/15.avi");
+    Mat mFrame;    
+    Rect mROI(mConfig._config.cropX, mConfig._config.cropY, mConfig._config.frmWidth - (2*mConfig._config.cropX),
+                 mConfig._config.frmHeight - (2*mConfig._config.cropY));
+    m_IsFinished = false;
 
-    bool continueToDetect = true;
-    int extraFrameCount = 0;
+    if (!mCapture.isOpened())
+    {
+        mCapture.release();
+
+        // Set _working to false, meaning the process can't be aborted anymore.
+        m_mutex.lock();
+        m_working = false;
+        m_IsFinished = true;
+        m_mutex.unlock();
+
+        emit finished();
+    }
 
     while(true)
     {
@@ -56,53 +70,36 @@ void VideoWork::doWork()
 
         try
         {
-            mCapture >> m_Frame;
-            if(m_Frame.empty())
-                break;
-            namedWindow("original");
-            moveWindow("original", 0, 0);
-            resize(m_Frame, m_Frame, cvSize(400, 300));
-            imshow("original", m_Frame);
 
-            if (continueToDetect)
+            if(!mCapture.read(mFrame))
             {
-                if (mDetector.detect(m_Frame))
-                {
-    //                if (mSaveKeyFrame && !saveFrame())
-    //                {
-    //                    cout << "Save key frame failed." << endl;
-    //                }
-    //                if (mSaveVideo)
-    //                {
-    //                    continueToDetect = false;
-    //                    continue;
-    //                }
-
-                    cout << "Flame detected." << endl;
-                    //return STATUS_FLAME_DETECTED;
-                }
-            }
-            else if (++extraFrameCount >= 80)
-            {
-                return;
-            }
-
-    #ifdef TRAIN_MODE
-            if (trainComplete) {
-                cout << "Train complete." << endl;
-                break;
-            }
-    #endif
-            if (waitKey(30) == 27) {
-                cout << "User abort." << endl;
+                m_mutex.lock();
+                m_IsFinished = true;
+                mCapture.release();
+                m_working = false;
+                m_mutex.unlock();
+                emit finished();
                 break;
             }
 
-            waitKey(50);
+            imshow("original", mFrame);
+
+#ifdef MODE_GRAYSCALE
+            cv::cvtColor(mFrame,mFrame, CV_BGRA2GRAY);
+#endif
+            resize(mFrame, mFrame, cvSize(mConfig._config.frmWidth, mConfig._config.frmHeight));
+
+            mFrame = mFrame(mROI);
+
+            m_mutex.lock();
+            mFrame.copyTo(m_Frame);
+            m_mutex.unlock();
+
+            waitKey(40);
            // phan code duoc bao ve
         }catch(...)
         {
-            continue;
+            continue;            
           // phan code de xu ly bat ky kieu ngoai le nao
         }
 
@@ -111,6 +108,7 @@ void VideoWork::doWork()
     // Set _working to false, meaning the process can't be aborted anymore.
     m_mutex.lock();
     m_working = false;
+    m_IsFinished = true;
     m_mutex.unlock();
 
     emit finished();

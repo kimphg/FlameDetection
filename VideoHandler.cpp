@@ -10,37 +10,29 @@
 
 extern CConfig mConfig;
 
-VideoHandler::VideoHandler(int device, bool saveKeyFrame, bool saveVideo)
+VideoHandler::VideoHandler(int device)
 : mCapture(device)
-, mSaveKeyFrame(saveKeyFrame)
-, mSaveVideo(saveVideo)
-, mFromCam(true)
-, mVideoFPS(0)
 {
-    if (mCapture.isOpened()) {
-        mVideoFPS = mCapture.get(CV_CAP_PROP_FPS);
-        if (mVideoFPS == 0) {
-            mVideoFPS = 8.0;
-        }
-    }
 }
 
-VideoHandler::VideoHandler(const string& file, bool saveKeyFrame)
+VideoHandler::VideoHandler(const string& file)
 : mCapture(file)
-, mSaveKeyFrame(saveKeyFrame)
-, mFromCam(false)
-, mVideoFPS(0)
 {
-    if (mCapture.isOpened()) {
-        mVideoFPS = mCapture.get(CV_CAP_PROP_FPS);
-        assert(mVideoFPS != 0);
-    }
 }
 
 int VideoHandler::handle()
 {
+
+    bool continueToDetect = true;
+    int extraFrameCount = 0;
+
+    QSound sound("alarm.wav");
+    sound.setLoops(5);
+
+
     // The thread and the worker are created in the constructor so it is always safe to delete them.
 #ifdef MODE_MULTITHREAD
+    mCapture.release();
     m_thread = new QThread();
     m_worker = new VideoWork();
     m_worker->moveToThread(m_thread);
@@ -51,18 +43,53 @@ int VideoHandler::handle()
     m_worker->abort();
     m_thread->wait();
     m_worker->requestWork();
+
+    while (continueToDetect)
+    {
+        m_worker->m_Frame.copyTo(mFrame);
+        if (mFrame.empty())
+            continue;
+
+        if (m_worker->m_IsFinished)
+            return 0;
+
+        if (true)//xu ly 3 frame 1 lan
+        {
+            if (mDetector.detect(mFrame))
+            {
+                if (sound.isFinished())
+                    sound.play();
+                cout << "Flame detected." << endl;
+                //return STATUS_FLAME_DETECTED;
+            }
+        }
+        else if (++extraFrameCount >= MAX_EXTRA_FRAME_COUNT)
+        {
+            return STATUS_FLAME_DETECTED;
+        }
+#ifdef TRAIN_MODE
+        if (trainComplete) {
+            cout << "Train complete." << endl;
+            break;
+        }
+#endif
+        if (waitKey(WAIT_INTERVAL) == 27) {
+            cout << "User abort." << endl;
+            break;
+        }
+    }
+
+    return STATUS_NO_FLAME_DETECTED;
+
     return 0;
 #endif
+
     if (!mCapture.isOpened()) {
         return STATUS_OPEN_CAP_FAILED;
     }
 
-    bool continueToDetect = true;
-    int extraFrameCount = 0;
-
-//    mCapture.set(CV_CAP_PROP_FRAME_WIDTH, mConfig._config.frmWidth);
-//    mCapture.set(CV_CAP_PROP_FRAME_HEIGHT, mConfig._config.frmHeight);
-
+    Rect mROI(mConfig._config.cropX, mConfig._config.cropY, mConfig._config.frmWidth - (2*mConfig._config.cropX),
+                 mConfig._config.frmHeight - (2*mConfig._config.cropY));
 
     while (continueToDetect)
     {
@@ -71,33 +98,22 @@ int VideoHandler::handle()
             cout << (mFromCam ? "Camera disconnected." : "Video file ended.") << endl;
             break;
         }
-        if (mFrame.empty()) continue;
+
 #ifdef MODE_GRAYSCALE
         cv::cvtColor(mFrame,mFrame, CV_BGRA2GRAY);
 #endif
-        imshow("original", mFrame);
         resize(mFrame, mFrame, cvSize(mConfig._config.frmWidth, mConfig._config.frmHeight));
 
-//        if (mSaveVideo && !saveVideo())
-//        {
-//            cout << "Save video failed." << endl;
-//            mSaveVideo = false;
-//        }
+        mFrame = mFrame(mROI);
+        imshow("original", mFrame);
 
         if (true)//xu ly 3 frame 1 lan
         {
             if (mDetector.detect(mFrame))
             {
-//                if (mSaveKeyFrame && !saveFrame())
-//                {
-//                    cout << "Save key frame failed." << endl;
-//                }
-//                if (mSaveVideo)
-//                {
-//                    continueToDetect = false;
-//                    continue;
-//                }
 
+                if (sound.isFinished())
+                    sound.play();
                 cout << "Flame detected." << endl;
                 //return STATUS_FLAME_DETECTED;
             }
@@ -129,27 +145,4 @@ bool VideoHandler::saveFrame()
     cout << "Saving key frame to '" << fileName << "'." << endl;
 
     return imwrite(fileName, mFrame);
-}
-
-bool VideoHandler::saveVideo()
-{
-    if (mSaveVideoFile.empty()) {
-        getCurTime(mSaveVideoFile);
-        mSaveVideoFile += ".mov";
-        cout << "Saving video to '" << mSaveVideoFile << "'." << endl;
-
-        // in Mac OS X, only 'mp4v' is supported
-        int fourcc = CV_FOURCC('m', 'p', '4', 'v');
-        Size size = Size((int)mCapture.get(CV_CAP_PROP_FRAME_WIDTH),
-                         (int)mCapture.get(CV_CAP_PROP_FRAME_HEIGHT));
-
-        mWriter.open(mSaveVideoFile, fourcc, mVideoFPS, size, true);
-    }
-
-    if (!mWriter.isOpened()) {
-        return false;
-    }
-
-    mWriter << mFrame;
-    return true;
 }

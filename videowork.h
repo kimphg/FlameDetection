@@ -18,6 +18,7 @@ class VideoWork : public QObject
 
 public:
     Mat     m_Frame;
+    bool    m_IsFinished;
 public:
     explicit VideoWork(QObject *parent = 0);
     void requestWork();
