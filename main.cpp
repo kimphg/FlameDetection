@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
 //    VideoHandler handler("C:/clips/IR.avi", true);
     //VideoHandler handler("D:/Example.asf", true);
 
-    VideoHandler handler("C:/clips/IR.asf");
+    VideoHandler handler("E:/My Works/ANTT/2017/VideoRecord/15.avi");
 
 //    VideoHandler handler("C:/clips/4.avi");
      //VideoHandler handler(0, true);
