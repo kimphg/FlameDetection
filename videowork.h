@@ -12,6 +12,7 @@
 #include "Config.h"
 #include "videowork.h"
 
+
 class VideoWork : public QObject
 {
     Q_OBJECT

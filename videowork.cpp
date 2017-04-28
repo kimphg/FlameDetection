@@ -35,6 +35,7 @@ void VideoWork::abort()
 
 void VideoWork::doWork()
 {
+
 //    VideoCapture mCapture("rtsp://192.168.0.253:554/stream1");
 //    VideoCapture mCapture(mConfig._config.strCamUrl);
     VideoCapture mCapture("E:/My Works/ANTT/2017/VideoRecord/15.avi");

@@ -15,6 +15,7 @@
 #include "Config.h"
 #include "videowork.h"
 #include "QSound"
+#include "tcpclient.h"
 
 class VideoHandler {
 private:
@@ -35,6 +36,7 @@ private:
 
     QThread         *m_thread;
     VideoWork       *m_worker;
+
     
 public:
     static const int STATUS_FLAME_DETECTED = 0;

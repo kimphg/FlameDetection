@@ -22,6 +22,8 @@ VideoHandler::VideoHandler(const string& file)
 
 int VideoHandler::handle()
 {
+    TCPClient client;
+    client.start("127.0.0.1", 8888);
 
     bool continueToDetect = true;
     int extraFrameCount = 0;
@@ -41,14 +43,17 @@ int VideoHandler::handle()
     m_worker->moveToThread(m_thread);
     QObject::connect(m_worker, SIGNAL(workRequested()), m_thread, SLOT(start()));
     QObject::connect(m_thread, SIGNAL(started()), m_worker, SLOT(doWork()));
-    QObject::connect(m_worker, SIGNAL(finished()), m_thread, SLOT(quit()), Qt::DirectConnection);
+    QObject::connect(m_worker, SIGNAL(finished()), m_thread, SLOT(quit()), Qt::DirectConnection);    
+
+
+
 
     m_worker->abort();
     m_thread->wait();
     m_worker->requestWork();
 
     while (continueToDetect)
-    {
+    {        
         m_worker->m_Frame.copyTo(mOrgFrame);
         if (mOrgFrame.empty())
             continue;
