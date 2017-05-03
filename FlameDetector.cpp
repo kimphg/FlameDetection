@@ -23,9 +23,10 @@ bool FlameDetector::detect(const Mat& frame)
     
     clock_t start, finish;
     if(++mFrameCount > SKIP_FRAME_COUNT)
-    {
+    {        
         mTrack = true;
         start = clock();
+        mFrameCount = SKIP_FRAME_COUNT + 1;
     }
     
     mExtractor.extract(mFrame, mTargetMap, mTrack);
@@ -44,10 +45,9 @@ bool FlameDetector::detect(const Mat& frame)
 //            sound.play();
         }
         cout << "duration: " << 1.0 * (finish - start) / CLOCKS_PER_SEC << endl;
-        cout << "frame: " << (mFrameCount - SKIP_FRAME_COUNT) << ", flame: " << mFlameCount << endl;
-        cout << "detection rate: " << 1.0 * mFlameCount / (mFrameCount - SKIP_FRAME_COUNT) << endl;
-
-        //cout << "Da phat hien" << endl;
+        //cout << "frame: " << (mFrameCount - SKIP_FRAME_COUNT) << ", flame: " << mFlameCount << endl;
+        cout << "flame: " << mFlameCount << endl;
+        //cout << "detection rate: " << 1.0 * mFlameCount / (mFrameCount - SKIP_FRAME_COUNT) << endl;
 
         return result;
     }
