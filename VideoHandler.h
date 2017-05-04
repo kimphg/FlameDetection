@@ -15,8 +15,8 @@
 #include "Config.h"
 #include "videowork.h"
 #include "QSound"
-#include "tcpclient.h"
-
+//#include "tcpclient.h"
+#include <qudpsocket.h>
 class VideoHandler {
 private:
     static const int WAIT_INTERVAL = 30;

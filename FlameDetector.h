@@ -28,6 +28,7 @@ struct Target {
     Region region;
     Feature feature;
     bool isFlame;
+    bool isSaved;
 };
 
 

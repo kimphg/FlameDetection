@@ -176,8 +176,9 @@ bool FlameDecider::judge(map<int, Target>& targets)
         if(!it->second.isFlame)
         {
             it->second.isFlame = isFlame;
-            flameDetected = true;
+
         }
+        flameDetected = isFlame;
         if (isFlame)
         {
 

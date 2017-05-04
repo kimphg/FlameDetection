@@ -22,8 +22,8 @@ VideoHandler::VideoHandler(const string& file)
 
 int VideoHandler::handle()
 {
-    TCPClient client;
-    client.start("127.0.0.1", 8888);
+   // TCPClient client;
+    //client.start("127.0.0.1", 8888);
 
     bool continueToDetect = true;
     int extraFrameCount = 0;

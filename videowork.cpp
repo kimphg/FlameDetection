@@ -37,8 +37,8 @@ void VideoWork::doWork()
 {
 
 //    VideoCapture mCapture("rtsp://192.168.0.253:554/stream1");
-//    VideoCapture mCapture(mConfig._config.strCamUrl);
-    VideoCapture mCapture("E:/My Works/ANTT/2017/VideoRecord/15.avi");
+    VideoCapture mCapture(mConfig._config.strCamUrl);
+    //VideoCapture mCapture("E:/My Works/ANTT/2017/VideoRecord/15.avi");
     Mat mFrame;    
 //    Rect mROI(mConfig._config.cropX, mConfig._config.cropY, mConfig._config.frmWidth - (2*mConfig._config.cropX),
 //                 mConfig._config.frmHeight - (2*mConfig._config.cropY));
