@@ -180,9 +180,9 @@ int VideoHandler::handle()
 bool VideoHandler::saveFrame()
 {   
     rectangle(mOrgFrame, mDetector.m_Rect, Scalar(0, 255, 0));
-    if (mDetector.m_Rect.x < (mConfig._config.frmWidth/3))
+    if (mDetector.m_Rect.x < (mConfig._config.frmWidth*2/5))
         return false;
-    if (mDetector.m_Rect.x > (mConfig._config.frmWidth*2/3))
+    if (mDetector.m_Rect.x > (mConfig._config.frmWidth*3/5))
         return false;
     // save detected frame to jpg
     string fileName;
