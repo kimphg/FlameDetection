@@ -15,13 +15,12 @@
 #include "Config.h"
 #include "videowork.h"
 #include "QSound"
-//#include "tcpclient.h"
-#include <qudpsocket.h>
+#include <QUdpSocket>
 class VideoHandler {
 private:
     static const int WAIT_INTERVAL = 30;
     static const int MAX_EXTRA_FRAME_COUNT = 80;
-
+    QUdpSocket      *alarmSocket;
     VideoCapture mCapture;
     FlameDetector mDetector;
     Mat mOrgFrame,  mFrame;
@@ -38,6 +37,8 @@ private:
     VideoWork       *m_worker;
 
     
+    void ActivateAlarm();
+    void DeactivateAlarm();
 public:
     static const int STATUS_FLAME_DETECTED = 0;
     static const int STATUS_OPEN_CAP_FAILED = 1;

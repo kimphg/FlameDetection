@@ -38,7 +38,7 @@ void VideoWork::doWork()
 
 //    VideoCapture mCapture("rtsp://192.168.0.253:554/stream1");
     VideoCapture mCapture(mConfig._config.strCamUrl);
-    //VideoCapture mCapture("E:/My Works/ANTT/2017/VideoRecord/15.avi");
+//    VideoCapture mCapture("E:/My Works/ANTT/2017/VideoRecord/15.avi");
     Mat mFrame;    
 //    Rect mROI(mConfig._config.cropX, mConfig._config.cropY, mConfig._config.frmWidth - (2*mConfig._config.cropX),
 //                 mConfig._config.frmHeight - (2*mConfig._config.cropY));
@@ -48,6 +48,7 @@ void VideoWork::doWork()
     {
         mCapture.release();
 
+        cout << "Capture video fail!" << endl;
         // Set _working to false, meaning the process can't be aborted anymore.
         m_mutex.lock();
         m_working = false;
@@ -76,6 +77,7 @@ void VideoWork::doWork()
             if(!mCapture.read(mFrame))
             {
                 m_mutex.lock();
+                cout << "Read frame fail!" << endl;
                 m_IsFinished = true;
                 mCapture.release();
                 m_working = false;
@@ -98,7 +100,7 @@ void VideoWork::doWork()
             resize(mFrame, m_Frame, cvSize(mConfig._config.frmWidth, mConfig._config.frmHeight));
             m_mutex.unlock();
             resize(mFrame, mFrame, cvSize(mConfig._config.frmWidth, mConfig._config.frmHeight));
-            imshow("original", mFrame);
+            //imshow("original", mFrame);
 
             waitKey(40);
            // phan code duoc bao ve

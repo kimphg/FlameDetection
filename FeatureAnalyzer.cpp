@@ -288,7 +288,7 @@ void Feature::calc(const Region& region, const Mat& frame)
     //
     double aspectRatio = ((double)region.rect.width)/region.rect.height;
     if(aspectRatio<1)aspectRatio = 1.0/aspectRatio;
-    assert(aspectRatio>1);
+    assert(aspectRatio>=1);
     aspectRatioVec.push_back(aspectRatio);
     mAreaVec.push_back(mArea);
     //calcFrequency();

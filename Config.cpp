@@ -44,6 +44,7 @@ void CConfig::LoadXmlFile()
     _config.brightThreshold  = cvReadIntByName(fs, 0, "BrightThreshold", 235);
     _config.cropX            = cvReadIntByName(fs, 0, "CropX", 40);
     _config.cropY            = cvReadIntByName(fs, 0, "CropY", 20);
+    _config.alarmNumber      = cvReadIntByName(fs, 0, "AlarmNumber", 1);
 
     cvReleaseFileStorage(&fs);
 }
@@ -63,6 +64,7 @@ void CConfig::setDefault()
     _config.brightThreshold = 235;
     _config.cropX           = 40;
     _config.cropY           = 20;
+    _config.alarmNumber     = 1;
     SaveXmlFile();
 }
 
@@ -84,6 +86,7 @@ void CConfig::SaveXmlFile()
     cvWriteInt(fs, "BrightThreshold", _config.brightThreshold);
     cvWriteInt(fs, "CropX", _config.cropX);
     cvWriteInt(fs, "CropY", _config.cropY);
+    cvWriteInt(fs, "AlarmNumber", _config.alarmNumber);
 
     cvReleaseFileStorage(&fs);
 }
