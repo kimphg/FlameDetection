@@ -41,8 +41,7 @@ bool FlameDetector::detect(const Mat& frame)
             mFlameCount++;
             m_Rect = Rect(mDecider.m_Rect.x + mConfig._config.cropX, mDecider.m_Rect.y + mConfig._config.cropY,
                           mDecider.m_Rect.width, mDecider.m_Rect.height);
-//            QSound sound("alarm.wav");
-//            sound.play();
+
         }
         cout << "duration: " << 1.0 * (finish - start) / CLOCKS_PER_SEC << endl;
         //cout << "frame: " << (mFrameCount - SKIP_FRAME_COUNT) << ", flame: " << mFlameCount << endl;

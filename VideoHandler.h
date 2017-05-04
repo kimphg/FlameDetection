@@ -24,7 +24,7 @@ private:
 
     VideoCapture mCapture;
     FlameDetector mDetector;
-    Mat mOrgFrame, mFrame;
+    Mat mOrgFrame,  mFrame;
     bool mFromCam;
     bool mSaveVideo;
     bool mSaveKeyFrame;

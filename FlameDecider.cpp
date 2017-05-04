@@ -173,13 +173,15 @@ bool FlameDecider::judge(map<int, Target>& targets)
     {
         if(it->second.times<200)continue;
         bool isFlame = svmPredict(it->second.feature);
-        it->second.isFlame = isFlame;
+        if(!it->second.isFlame)
+        {
+            it->second.isFlame = isFlame;
+            flameDetected = true;
+        }
         if (isFlame)
         {
-            flameDetected = true;
+
             m_Rect = it->second.region.rect;
-
-
 //            rectangle(temp, it->second.region.rect, Scalar(0, 255, 0));
 //            // save detected frame to jpg
 //            string fileName;

@@ -32,7 +32,7 @@ int VideoHandler::handle()
                  mConfig._config.frmHeight - (2*mConfig._config.cropY));
 
     QSound sound("alarm.wav");
-    sound.setLoops(5);
+    sound.setLoops(15);
 
 
     // The thread and the worker are created in the constructor so it is always safe to delete them.
@@ -44,9 +44,6 @@ int VideoHandler::handle()
     QObject::connect(m_worker, SIGNAL(workRequested()), m_thread, SLOT(start()));
     QObject::connect(m_thread, SIGNAL(started()), m_worker, SLOT(doWork()));
     QObject::connect(m_worker, SIGNAL(finished()), m_thread, SLOT(quit()), Qt::DirectConnection);    
-
-
-
 
     m_worker->abort();
     m_thread->wait();
@@ -67,7 +64,7 @@ int VideoHandler::handle()
         if (m_worker->m_IsFinished)
             return 0;
 
-        if (true)//xu ly 3 frame 1 lan
+        if (true)
         {
             if (mDetector.detect(mFrame))
             {
