@@ -87,16 +87,16 @@ int VideoHandler::handle()
         {
             if (mDetector.detect(mFrame))
             {
-                saveFrame();                
-                if (sound.isFinished())
-                    sound.play();
+                if (saveFrame())
+                {
+                    if (sound.isFinished())
+                        sound.play();
+                    this->ActivateAlarm();
+                }
                 cout << "Flame detected." << endl;
-                this->ActivateAlarm();
 
-                //return STATUS_FLAME_DETECTED;
             }
-            //    namedWindow("result");
-            //    moveWindow("result", 0, 0);
+
             imshow("result", mOrgFrame);
         }
         else if (++extraFrameCount >= MAX_EXTRA_FRAME_COUNT)
@@ -147,12 +147,13 @@ int VideoHandler::handle()
 
             if (mDetector.detect(mFrame))
             {
-                saveFrame();
-
-                if (sound.isFinished())
-                    sound.play();
+                if (saveFrame())
+                {
+                    if (sound.isFinished())
+                        sound.play();
+                    this->ActivateAlarm();
+                }
                 cout << "Flame detected." << endl;
-                //return STATUS_FLAME_DETECTED;
             }
 
             imshow("result", mOrgFrame);
