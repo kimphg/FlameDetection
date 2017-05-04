@@ -25,7 +25,7 @@ void VideoHandler::ActivateAlarm()
     message[0]=0xff;
     message[1]=0xff;
     message[2]=0xff;
-    message[3]= 1;//mConfig._config.alarmNumber;
+    message[3]= mConfig._config.alarmNumber;
     message[4]=0xff;
     alarmSocket->writeDatagram((char*)&message[0],5, QHostAddress("192.168.100.255") , 8888);
 }

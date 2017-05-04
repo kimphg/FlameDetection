@@ -38,14 +38,14 @@ bool FlameDetector::detect(const Mat& frame)
 
         if (result)
         {
-            mFlameCount++;
+            //mFlameCount++;
             m_Rect = Rect(mDecider.m_Rect.x + mConfig._config.cropX, mDecider.m_Rect.y + mConfig._config.cropY,
                           mDecider.m_Rect.width, mDecider.m_Rect.height);
 
         }
         cout << "duration: " << 1.0 * (finish - start) / CLOCKS_PER_SEC << endl;
         //cout << "frame: " << (mFrameCount - SKIP_FRAME_COUNT) << ", flame: " << mFlameCount << endl;
-        cout << "flame: " << mFlameCount << endl;
+        //cout << "flame: " << mFlameCount << endl;
         //cout << "detection rate: " << 1.0 * mFlameCount / (mFrameCount - SKIP_FRAME_COUNT) << endl;
 
         return result;
