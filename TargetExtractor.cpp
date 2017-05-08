@@ -414,7 +414,7 @@ void TargetExtractor::contoursAreaFilter(int smallThreshold, int largeThreshold,
 //        if (rect.width < 0.01 * mMask.cols && rect.height < 0.01 * mMask.rows) {
 //            continue;
 //        }
-
+        if((double)rect.width/rect.height>1.2)continue;
         indexes.push_back(i);
         areas.push_back(area);
         boundRects.push_back(rect);

@@ -37,8 +37,8 @@ void VideoWork::doWork()
 {
 
 //    VideoCapture mCapture("rtsp://192.168.0.253:554/stream1");
-//    VideoCapture mCapture(mConfig._config.strCamUrl);
-    VideoCapture mCapture("E:/My Works/ANTT/2017/VideoRecord/15.avi");
+      VideoCapture mCapture(mConfig._config.strCamUrl);
+//    VideoCapture mCapture("C:/VideoRecord/15.avi");
 //      VideoCapture mCapture("D:/clips/IR.avi");
 
     Mat mFrame;    
@@ -104,7 +104,7 @@ void VideoWork::doWork()
             resize(mFrame, mFrame, cvSize(mConfig._config.frmWidth, mConfig._config.frmHeight));
             //imshow("original", mFrame);
 
-            waitKey(40);
+            waitKey(10);
            // phan code duoc bao ve
         }catch(...)
         {

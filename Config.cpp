@@ -31,8 +31,8 @@ void CConfig::LoadXmlFile()
         return;
     }
 
-    _config.strCamUrl        = cvReadStringByName(fs, 0, "CamUrl", "rtsp://192.168.0.253:554/stream1"); // for K9-Camera: "rtsp://service:12345678@192.168.100.100:554/"
-    //_config.strCamUrl        = cvReadStringByName(fs, 0, "CamUrl", "rtsp://service:12345678@192.168.100.100:554/");
+    //_config.strCamUrl        = cvReadStringByName(fs, 0, "CamUrl", "rtsp://192.168.0.253:554/stream1"); // for K9-Camera: "rtsp://service:12345678@192.168.100.100:554/"
+    _config.strCamUrl        = cvReadStringByName(fs, 0, "CamUrl", "rtsp://service:12345678@192.168.100.100:554/");
     _config.frmPosX          = cvReadIntByName(fs, 0, "FrmPosX", 0);
     _config.frmPosY          = cvReadIntByName(fs, 0, "FrmPosY", 0);
     _config.frmWidth         = cvReadIntByName(fs, 0, "FrmWidth", 600);
@@ -51,8 +51,8 @@ void CConfig::LoadXmlFile()
 
 void CConfig::setDefault()
 {
-    _config.strCamUrl       = "rtsp://192.168.0.253:554/stream1"; // for K9-Camera: "rtsp://service:12345678@192.168.100.100:554/"
-    //_config.strCamUrl       = "rtsp://service:12345678@192.168.100.100:554/";
+    //_config.strCamUrl       = "rtsp://192.168.0.253:554/stream1"; // for K9-Camera: "rtsp://service:12345678@192.168.100.100:554/"
+    _config.strCamUrl       = "rtsp://service:12345678@192.168.100.100:554/";
     _config.frmPosX         = 0;
     _config.frmPosY         = 0;
     _config.frmWidth        = 600;
