@@ -42,8 +42,8 @@ void CConfig::LoadXmlFile()
     _config.keepCount        = cvReadIntByName(fs, 0, "KeepCount", 2);
     _config.movDetect        = cvReadRealByName(fs, 0, "MovDetect", -1);
     _config.brightThreshold  = cvReadIntByName(fs, 0, "BrightThreshold", 235);
-    _config.cropX            = cvReadIntByName(fs, 0, "CropX", 40);
-    _config.cropY            = cvReadIntByName(fs, 0, "CropY", 20);
+    _config.cropX            = cvReadIntByName(fs, 0, "CropX", 50);
+    _config.cropY            = cvReadIntByName(fs, 0, "CropY", 35);
     _config.alarmNumber      = cvReadIntByName(fs, 0, "AlarmNumber", 1);
 
     cvReleaseFileStorage(&fs);
@@ -62,8 +62,8 @@ void CConfig::setDefault()
     _config.keepCount       = 2;
     _config.movDetect       = -1;
     _config.brightThreshold = 235;
-    _config.cropX           = 40;
-    _config.cropY           = 20;
+    _config.cropX           = 50;
+    _config.cropY           = 35;
     _config.alarmNumber     = 1;
     SaveXmlFile();
 }
