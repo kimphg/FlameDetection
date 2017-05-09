@@ -181,10 +181,16 @@ int VideoHandler::handle()
 bool VideoHandler::saveFrame()
 {   
     rectangle(mOrgFrame, mDetector.m_Rect, Scalar(0, 255, 0));
+//    rectangle(mOrgFrame, Rect(mConfig._config.cropX, mConfig._config.cropY, mConfig._config.frmWidth - (2*mConfig._config.cropX), mConfig._config.frmHeight
+//                              - (2*mConfig._config.cropY)), Scalar(0, 0, 255));
+
     if (mDetector.m_Rect.x < (mConfig._config.frmWidth*1/3))
         return false;
     if (mDetector.m_Rect.x > (mConfig._config.frmWidth*2/3))
         return false;
+    if ((mDetector.m_Rect.y + mDetector.m_Rect.height) >= (mConfig._config.frmHeight - mConfig._config.cropY - 2))
+        return false;
+
     // save detected frame to jpg
     string fileName;
     getCurTime(fileName);
