@@ -505,6 +505,19 @@ void TargetExtractor::addNewTarget(map<int, Target>& targets,Region reg)
     targets[id].isFlame=0;
     targets[id].isSaved=false;
 }
+bool TargetExtractor::checkRegionMatch(Region* reg1,Region* reg2)
+{
+    bool result = reg1->near(*reg2);
+    if(result)
+    {
+        double hratio = ((double)reg1->rect.height)/reg2->rect.height;
+        if(hratio<1.0)hratio = 1.0/hratio;
+        double wratio = ((double)reg1->rect.width)/reg2->rect.width;
+        if(wratio<1.0)wratio = 1.0/wratio;
+        if(hratio>1.2||wratio>1.2) result=false;
+    }
+    return result;
+}
 void TargetExtractor::blobTrack(map<int, Target>& targets)
 {
     list<Region> regions;

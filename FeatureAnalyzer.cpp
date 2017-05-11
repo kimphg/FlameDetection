@@ -51,7 +51,7 @@ void Feature::calcGeometryFeature(const Region& region)
     double new_roughness = 0;
     
     const vector<ContourInfo*>& contours = region.contours;
-    for (vector<ContourInfo*>::const_iterator it = contours.begin(); it != contours.end(); it++) {
+    for (vector<ContourInfo*>::const_iterator it = contours.begin(); it == contours.vbegin(); it++) {//only first element
         const vector<Point>& contour = (*it)->contour;
         double area = (*it)->area;
         
@@ -61,18 +61,15 @@ void Feature::calcGeometryFeature(const Region& region)
         convexHull(contour, hull);
         double perimeterHull = arcLength(hull, true);
         double width = minRect.size.width, height = minRect.size.height;
-        
-        new_circularity += area * (4 * 3.1416 * area / (perimeter * perimeter));
-        new_squareness  += area * (area / (width * height));
+
+        new_circularity = (4.0 * 3.141592654 * area / (perimeter * perimeter));
+        new_squareness =  (area / (width * height));
         //new_aspectRatio += area * (1.0 * min(width, height) / max(width, height));
         new_roughness   += area * (perimeterHull / perimeter);
     }
-    
-
-    //circularity +=(new_circularity-circularity)/10;
-    //squareness +=(new_squareness-squareness)/10;
-    //aspectRatioMean +=(new_aspectRatio-aspectRatioMean)/10;
-    roughness +=(new_roughness-roughness)/10;
+    circularityVec.push_back(new_circularity);
+    squarenessVar
+    roughness +=(new_roughness-roughness)/5.0;
 }
 
 void Feature::calcTexture(int levels, int dx, int dy)

@@ -28,6 +28,7 @@ private:
     vector<double> mAreaVec;
     vector<double> aspectRatioVec;
     vector<double> circularityVec;
+    vector<double> squarenessVec;
     void calcColorFeature();
     void calcGeometryFeature(const Region& region);
     void calcTexture(int levels = 16, int dx = 3, int dy = 3);
@@ -50,10 +51,9 @@ public:
     double texture[4];
     
     // dynamic features
-    double aspectRatioMean;
-    double aspectRatioVar;
-    double circularityVar;
-    double squarenessVar;
+    double aspectRatioMean, aspectRatioVar;
+    double circularityMean, circularityVar;
+    double squarenessMean,  squarenessVar;
     double frequency;
     double areaVar;
     void calc(const Region& region, const Mat& frame);
