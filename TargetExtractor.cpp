@@ -738,11 +738,11 @@ void TargetExtractor::extract(const Mat& frame, map<int, Target>& targets, bool 
 
     contoursAreaFilter(mConfig._config.smallArea, mConfig._config.largeArea, mConfig._config.keepCount);
 
-//#ifdef DEBUG_MODE
-    //namedWindow("mask");
-    //moveWindow("mask", 600, 10);
-    //imshow("mask", mMask);
-//#endif
+#ifdef TRAIN_MODE
+    namedWindow("mask");
+   // moveWindow("mask", 600, 10);
+    imshow("mask", mMask);
+#endif
     if (track) {
         blobTrack(targets);
     }

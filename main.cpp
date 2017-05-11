@@ -21,14 +21,14 @@ int main(int argc, char *argv[])
 //    VideoHandler* videoHandler = NULL;
 
 
-    VideoHandler handler("C:/clips/IR.avi");
+    //VideoHandler handler("C:/clips/IR.avi");
     //VideoHandler handler("D:/Example.asf", true);
 //
 //    VideoHandler handler("E:/My Works/ANTT/2017/VideoRecord/15.avi");
 
     //VideoHandler handler("C:/clips/4.avi");
      //VideoHandler handler(0, true);
-//  VideoHandler handler(mConfig._config.strCamUrl);
+    VideoHandler handler(mConfig._config.strCamUrl);
 
     videoHandler = &handler;
 

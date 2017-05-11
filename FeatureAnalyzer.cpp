@@ -112,13 +112,13 @@ void Feature::calcGeometryFeature(const Region& region)
     avrOutside/=(mTargetFrame.rows*mTargetFrame.cols-countInside);
     double new_diffInOut = avrInside-avrOutside;
     diffInOut += (new_diffInOut-diffInOut)/5.0;
-    if(diffInOut<60)dataReady = false;
+    //if(diffInOut<60)dataReady = false;
     if (dataReady)
     {
         Scalar m, s;
         //area
-        meanStdDev(mAreaVec, m, s);
-        areaVar = s[0] / m[0];
+//        meanStdDev(mAreaVec, m, s);
+//        areaVar = s[0] / m[0];
         //aspect ratio
         meanStdDev(aspectRatioVec, m, s);
         aspectRatioVar = s[0] / m[0];
@@ -220,8 +220,7 @@ void Feature::calcFrequency()
 {
     // TODO: optimize this part
     
-    if (mAreaVec.size() < MAX_AREA_VEC_SIZE) {
-        frequency = -1;
+    if (!dataReady) {
         return;
     }
     
@@ -242,9 +241,12 @@ void Feature::calcFrequency()
             idx = (i + 1) / 2;
         }
     }
-    
-    double fps = videoHandler->getVideoFPS();
-    frequency = fps / MAX_AREA_VEC_SIZE * idx;
+    if(idx!=1)
+    {
+         idx=idx;
+    }
+    //double fps = videoHandler->getVideoFPS();
+    frequency = 30.0 / MAX_AREA_VEC_SIZE * idx;
 
 #ifdef DEBUG_OUTPUT
     cout << "fps: " << fps << ", frequency: " << frequency << endl;
@@ -285,7 +287,7 @@ void Feature::calc(const Region& region, const Mat& frame)
     calcGeometryFeature(region);
     calcDynamicFeatures();
     calcTexture();
-    //calcFrequency();
+    calcFrequency();
 
 }
 
@@ -320,7 +322,7 @@ void Feature::printValue() const
            << squarenessVar<<" squarenessVar\n "
            << aspectRatioVar<<" aspectRatioVar\n "
            << roughness<<" roughness\n "
-           << areaVar<<" areaVar\n "
+           << frequency<<" frequency\n "
            << diffInOut<<" diffInOut\n "
            << texture[0]<<" texture\n "
            << texture[1]<<" texture\n "
@@ -341,7 +343,7 @@ Feature::operator Mat() const
             , squarenessVar
             , aspectRatioVar
             , roughness
-            , areaVar
+            , frequency
             , diffInOut
             , texture[0]
             , texture[1]
@@ -365,7 +367,7 @@ ifstream& operator>>(ifstream& ifs, Feature& feature)
         >> feature.squarenessVar
         >> feature.aspectRatioVar
         >> feature.roughness
-        >> feature.areaVar
+        >> feature.frequency
         >> feature.diffInOut
         >> feature.texture[0] >> feature.texture[1]
         >> feature.texture[2] >> feature.texture[3];
@@ -387,7 +389,7 @@ ofstream& operator<<(ofstream& ofs, const Feature& feature)
             << feature.squarenessVar    <<" "
             << feature.aspectRatioVar   <<" "
             << feature.roughness        <<" "
-            << feature.areaVar          <<" "
+            << feature.frequency          <<" "
             << feature.diffInOut        <<" "
             << feature.texture[0] <<" "
             << feature.texture[1] <<" "
@@ -418,7 +420,7 @@ cirMean  squarMea RatioMn circVar  sqrnesVar aRatioVar roughne  areaVar   diInOu
 0.223292 0.67291  7.52355 0.044961 0.0232181 0.048476  0.931409 0.0601913 49.1084 2.26299 0.00677054 34.3874 0.212796 0
 0.214137 0.786111 9.47987 0.250147 0.0204964 0.233355  0.953267 0.177479  37.1381 2.24102 0.00748833 34.302 0.222142 0
 */
-#ifdef DEBUG_OUTPUT
+#ifdef PHUONGS_ALGORITHM
 void Feature::printAreaVec() const
 {
     vector<double>::size_type size = mAreaVec.size();

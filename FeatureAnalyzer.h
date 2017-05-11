@@ -22,7 +22,7 @@ private:
     Mat mMask;
     double mArea;
 
-    static const int MAX_AREA_VEC_SIZE = 32;
+    static const int MAX_AREA_VEC_SIZE = 64;
     
     // if we use list here, we need to convert it to vector each time. so use vector instead.
     vector<double> mAreaVec;
@@ -64,7 +64,7 @@ public:
 public:
     Feature();
 
-#ifdef DEBUG_OUTPUT
+#ifdef PHUONGS_ALGORITHM
     void printAreaVec() const;
 #endif
 };

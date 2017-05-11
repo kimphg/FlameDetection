@@ -61,8 +61,13 @@ void FlameDecider::userInput(const map<int, Target>& targets)
         if(!it->second.feature.dataReady)continue;
         const Feature& feature = it->second.feature;
         const Rectangle& rect = it->second.region.rect;
+#ifdef DEBUG_MODE
+        cout << "freq: " << feature.frequency << endl;
+        feature.printAreaVec();
         feature.printValue();
         std::cout.flush();
+#endif
+
         Mat temp;
         mFrame.copyTo(temp);
         bool flag = true;
@@ -80,10 +85,7 @@ void FlameDecider::userInput(const map<int, Target>& targets)
                     break;
                 case 'y':   // press 'y' to add a positive record to sample
                     ofs << feature << true << endl;
-#ifdef DEBUG_OUTPUT
-                    cout << "freq: " << feature.frequency << endl;
-                    feature.printAreaVec();
-#endif
+
                     mFeatureVec.push_back(feature);
                     mResultVec.push_back(true);
                     mFlameCount++;
