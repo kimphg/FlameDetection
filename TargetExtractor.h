@@ -77,6 +77,7 @@ private:
     
     void addNewTarget(map<int, Target>& targets,Region reg);
     void cotrastDetect(double mag);
+    bool checkRegionMatch(Region *reg1, Region *reg2);
 public:
     TargetExtractor();
     const Mat& getMask() const {

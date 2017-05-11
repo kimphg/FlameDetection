@@ -61,7 +61,8 @@ void FlameDecider::userInput(const map<int, Target>& targets)
         if(!it->second.feature.dataReady)continue;
         const Feature& feature = it->second.feature;
         const Rectangle& rect = it->second.region.rect;
-        
+        feature.printValue();
+        std::cout.flush();
         Mat temp;
         mFrame.copyTo(temp);
         bool flag = true;
@@ -71,8 +72,9 @@ void FlameDecider::userInput(const map<int, Target>& targets)
             switch (key) {
                 case -1:    // no key pressed
                     rectangle(temp, rect, flag ? Scalar(0, 0, 255) : Scalar(0, 255, 0));
-                    namedWindow("temp");
-                    //moveWindow("temp", 350, 400);
+                    //namedWindow("temp");
+
+                    moveWindow("temp", 0, 0);
                     imshow("temp", temp);
                     flag = !flag;
                     break;
@@ -171,6 +173,8 @@ bool FlameDecider::judge(map<int, Target>& targets)
     
     for (map<int, Target>::iterator it = targets.begin(); it != targets.end(); it++)
     {
+
+        if(!it->second.feature.dataReady)continue;
         if(it->second.times<100)continue;
         bool isFlame = svmPredict(it->second.feature);
         if(!it->second.isFlame)

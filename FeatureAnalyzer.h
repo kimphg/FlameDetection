@@ -18,7 +18,7 @@ class Region;
 class Feature {
 private:
     Mat mROI;
-    Mat mGray;
+    Mat mTargetFrame;
     Mat mMask;
     double mArea;
 
@@ -36,7 +36,7 @@ private:
     void calcDynamicFeatures();
     
 public:
-    static const int LEN = 11;
+    static const int LEN = 13;
     bool dataReady;
     // color features
     //double red[4];
@@ -58,6 +58,7 @@ public:
     double areaVar;
     void calc(const Region& region, const Mat& frame);
     static void merge(const vector<const Feature*>& src, Feature& feature);
+    void printValue()const;
     operator Mat() const;
 
 public:

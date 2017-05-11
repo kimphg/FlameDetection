@@ -561,7 +561,7 @@ void TargetExtractor::blobTrack(map<int, Target>& targets)
              it_target++)
         {
 
-            if(it_reg->near((it_target->second.region))&&
+            if(checkRegionMatch(&*it_reg,&(it_target->second.region))&&// it_reg->near((it_target->second.region))&&
                     (it_target->second.type == Target::TARGET_LOST))
             {
 
