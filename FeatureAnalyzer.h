@@ -27,6 +27,7 @@ private:
     // if we use list here, we need to convert it to vector each time. so use vector instead.
     vector<double> mAreaVec;
     vector<double> aspectRatioVec;
+    vector<double> circularityVec;
     void calcColorFeature();
     void calcGeometryFeature(const Region& region);
     void calcTexture(int levels = 16, int dx = 3, int dy = 3);
@@ -42,8 +43,7 @@ public:
     //double saturation[4];
     
     // geometric features
-    double circularity;
-    double squareness;
+
     double roughness;
     double diffInOut;
     // structural features
@@ -52,6 +52,8 @@ public:
     // dynamic features
     double aspectRatioMean;
     double aspectRatioVar;
+    double circularityVar;
+    double squarenessVar;
     double frequency;
     double areaVar;
     void calc(const Region& region, const Mat& frame);

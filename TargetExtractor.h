@@ -46,8 +46,7 @@ public:
 
 
 class TargetExtractor {
-//public:
-//    Mat mMask;
+
 private:
     static const int MAX_MASK_QUEUE_SIZE = 10;
 

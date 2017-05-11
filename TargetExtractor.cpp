@@ -414,7 +414,7 @@ void TargetExtractor::contoursAreaFilter(int smallThreshold, int largeThreshold,
 //        if (rect.width < 0.01 * mMask.cols && rect.height < 0.01 * mMask.rows) {
 //            continue;
 //        }
-        if((double)rect.width/rect.height>1.2)continue;
+        //if((double)rect.width/rect.height>1.2)continue;
         indexes.push_back(i);
         areas.push_back(area);
         boundRects.push_back(rect);
@@ -512,7 +512,7 @@ void TargetExtractor::blobTrack(map<int, Target>& targets)
         regions.push_back(Region(&(*it), it->boundRect));
     }
     //merge nearby regions
-    list<Region>::size_type lastRegionsSize;
+    /*list<Region>::size_type lastRegionsSize;
     do {
         lastRegionsSize = regions.size();
         for (list<Region>::iterator it1 = regions.begin(); it1 != regions.end(); it1++) {
@@ -526,7 +526,7 @@ void TargetExtractor::blobTrack(map<int, Target>& targets)
                 }
             }
         }
-    } while (regions.size() != lastRegionsSize);
+    } while (regions.size() != lastRegionsSize);*/
 
 #ifdef PHUONGS_ALGORITHM
     // reset all targets
@@ -702,7 +702,9 @@ void TargetExtractor::extract(const Mat& frame, map<int, Target>& targets, bool 
     //int thresh = mConfig._config.brightThreshold;
     colorDetect(mConfig._config.brightThreshold);
     //cotrastDetect(1.5);
-    //imshow("mask", mMask);
+#ifdef DEBUG_MODE
+    imshow("mask", mMask);
+#endif
     //denoise(7, 5);
     //fill(7, 5);
     //medianBlur(mMask, mMask, 3);

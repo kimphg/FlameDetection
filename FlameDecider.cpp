@@ -171,7 +171,7 @@ bool FlameDecider::judge(map<int, Target>& targets)
     
     for (map<int, Target>::iterator it = targets.begin(); it != targets.end(); it++)
     {
-        if(it->second.times<200)continue;
+        if(it->second.times<100)continue;
         bool isFlame = svmPredict(it->second.feature);
         if(!it->second.isFlame)
         {

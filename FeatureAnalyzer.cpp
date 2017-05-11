@@ -48,7 +48,6 @@ void Feature::calcGeometryFeature(const Region& region)
 {
     double new_circularity = 0;
     double new_squareness = 0;
-    //double new_aspectRatio = 0;
     double new_roughness = 0;
     
     const vector<ContourInfo*>& contours = region.contours;
@@ -69,12 +68,9 @@ void Feature::calcGeometryFeature(const Region& region)
         new_roughness   += area * (perimeterHull / perimeter);
     }
     
-    new_circularity /= mArea;
-    new_squareness  /= mArea;
-    //new_aspectRatio /= mArea;
-    new_roughness   /= mArea;
-    circularity +=(new_circularity-circularity)/10;
-    squareness +=(new_squareness-squareness)/10;
+
+    //circularity +=(new_circularity-circularity)/10;
+    //squareness +=(new_squareness-squareness)/10;
     //aspectRatioMean +=(new_aspectRatio-aspectRatioMean)/10;
     roughness +=(new_roughness-roughness)/10;
 }
@@ -244,8 +240,8 @@ void Feature::calcDynamicFeatures()
 
 Feature::Feature()
 {
-    circularity=0;
-    squareness=0;
+    circularityVar=0;
+    squarenessVar=0;
     aspectRatioMean=0;
     roughness=0;
     diffInOut=0;
@@ -323,7 +319,7 @@ Feature::operator Mat() const
 //            red[0], red[1], red[2], red[3],
 //            gray[0], gray[1], gray[2], gray[3],
 //            saturation[0], saturation[1], saturation[2], saturation[3],
-            circularity, squareness, aspectRatioMean, aspectRatioVar,
+            circularityVar, squarenessVar, aspectRatioMean, aspectRatioVar,
             roughness, areaVar, diffInOut,
             texture[0], texture[1], texture[2], texture[3]);
 }
@@ -336,7 +332,7 @@ ifstream& operator>>(ifstream& ifs, Feature& feature)
         >> feature.gray[2] >> feature.gray[3]
         >> feature.saturation[0] >> feature.saturation[1]
         >> feature.saturation[2] >> feature.saturation[3]*/
-        >> feature.circularity >> feature.squareness
+        >> feature.circularityVar >> feature.circularityVar
         >> feature.aspectRatioMean >> feature.aspectRatioVar>> feature.roughness
         >> feature.areaVar   >>feature.diffInOut
         >> feature.texture[0] >> feature.texture[1]
@@ -352,7 +348,7 @@ ofstream& operator<<(ofstream& ofs, const Feature& feature)
         << feature.gray[2] << " " << feature.gray[3] << " "
         << feature.saturation[0] << " " << feature.saturation[1] << " "
         << feature.saturation[2] << " " << feature.saturation[3] << " "*/
-        << feature.circularity << " " << feature.squareness << " "
+        << feature.circularityVar << " " << feature.squarenessVar << " "
         << feature.aspectRatioMean << " " << feature.aspectRatioVar << " "
         <<feature.roughness << " "
         << feature.areaVar   << " " <<feature.diffInOut  << " "
