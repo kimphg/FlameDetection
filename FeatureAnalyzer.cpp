@@ -421,18 +421,58 @@ cirMean  squarMea RatioMn circVar  sqrnesVar aRatioVar roughne  areaVar   diInOu
 0.214137 0.786111 9.47987 0.250147 0.0204964 0.233355  0.953267 0.177479  37.1381 2.24102 0.00748833 34.302 0.222142 0
 */
 #ifdef PHUONGS_ALGORITHM
+template <typename T>
+cv::Mat plotGraph(const std::vector<T>& vals, int YRange[2],int xstep = 1)
+{
+
+    auto it = minmax_element(vals.begin(), vals.end());
+    float scale = 1./ceil(*it.second - *it.first);
+    float bias = *it.first;
+    int rows = YRange[1] - YRange[0] + 1;
+    cv::Mat image = Mat::zeros( rows, vals.size()*xstep, CV_8UC3 );
+    image.setTo(0);
+    for (int i = 0; i < (int)vals.size()-1; i+=1)
+    {
+        int x = i*xstep;
+        cv::line(image, cv::Point(x, rows - 1 - (vals[i] - bias)*scale*YRange[1]), cv::Point(x+xstep, rows - 1 - (vals[i+1] - bias)*scale*YRange[1]), Scalar(255, 0, 0), 1);
+    }
+
+    return image;
+}
+
 void Feature::printAreaVec() const
 {
-    vector<double>::size_type size = mAreaVec.size();
-    
-    for (int i = 0; i < size; i++) {
-        cout << mAreaVec[i];
-        if (i != size - 1) {
-            cout << ", ";
-        } else {
-            cout << endl;
-        }
+    int range[2] = {-200,200};
+
+    imshow("mAreaVec",plotGraph(mAreaVec,range,20));
+
+
+
+    std::vector<double> vec;//(p,dftmat.size());
+    dft(mAreaVec,vec);
+    imshow("spec",plotGraph(vec,range,20));
+    std::vector<double> ampl(vec.size());
+    for (int i = 1; i < MAX_AREA_VEC_SIZE; i += 2) {
+        ampl[i] = (i == MAX_AREA_VEC_SIZE - 1) ? vec[i] :
+            sqrt(vec[i] * vec[i] + vec[i + 1] * vec[i + 1]);
+//        if (ampl > maxAmpl) {
+//            maxAmpl = ampl;
+//            idx = (i + 1) / 2;
+//        }
     }
+    imshow("ampl",plotGraph(ampl,range,20));
+    //cv::plot::createPlot2d (mAreaVec);
+
+//    vector<double>::size_type size = mAreaVec.size();
+    
+//    for (int i = 0; i < size; i++) {
+//        cout << mAreaVec[i];
+//        if (i != size - 1) {
+//            cout << ", ";
+//        } else {
+//            cout << endl;
+//        }
+//    }
 }
 #endif
 
@@ -496,12 +536,13 @@ void FeatureAnalyzer::analyze(const Mat& frame, map<int, Target>& targets)
     
     targetUpdate(targets);
     
+
+#ifdef DEBUG_MODE
     Mat temp;
     mFrame.copyTo(temp);
     for (map<int, Target>::iterator it = targets.begin(); it != targets.end(); it++) {
         rectangle(temp, it->second.region.rect, Scalar(0, 255, 0));
     }
-#ifdef DEBUG_MODE
     namedWindow("frame");
     moveWindow("frame", 10, 500);
     imshow("frame", temp);

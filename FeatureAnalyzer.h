@@ -10,7 +10,7 @@
 #define __FlameDetection__FeatureAnalyzer__
 
 #include "common.h"
-
+#include "cvplot.h"
 struct Target;
 class Region;
 

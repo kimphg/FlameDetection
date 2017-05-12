@@ -193,16 +193,56 @@ void TargetExtractor::movementDetect(double learningRate)
 void TargetExtractor::colorDetect(int threshold)
 {
 
-    Mat temp ;//= mFrame;
+    Mat temp ,mask = mMask;//= mFrame;
     GaussianBlur(mFrame, temp, Size(3, 3), 0);
+    int neightbouringDistance = 4;
 #ifdef MODE_GRAYSCALE
-    for (uint i = 0; i < temp.rows; i++)
+    //adaptiveThreshold(mFrame, mMask, 255, ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY, 21, 0);
+    for (uint i = 1; i < temp.rows; i++)
     {
-        for (uint j = 0; j < temp.cols; j++)
+        for (uint j = 1; j < temp.cols; j++)
         {
-            mMask.at<uchar>(i, j) = (mFrame.at<uchar>(i,j)>threshold)?255:0;
+            int value = mFrame.at<uchar>(i,j);
+            if((value>threshold))
+            {
+                mMask.at<uchar>(i, j) = 255;
+                mask.at<uchar>(i, j) = 255;
+            }
+            else
+            {
+                if(mMask.at<uchar>(i-1, j)==255)
+                {
+                    if((mFrame.at<uchar>(i-1,j)-value) < neightbouringDistance)
+                        mMask.at<uchar>(i, j) = 255;
+                }
+                if(mMask.at<uchar>(i, j-1)==255)
+                {
+                    if((mFrame.at<uchar>(i,j-1)-value) < neightbouringDistance)
+                        mMask.at<uchar>(i, j) = 255;
+                }
+            }
+
         }
     }
+    for (uint i = temp.rows-2; i >0 ; i--)
+    {
+        for (uint j = temp.cols-2; j > 0 ; j--)
+        {
+            if(mMask.at<uchar>(i, j)==0)
+            {
+                int value = mFrame.at<uchar>(i,j);
+                if(mMask.at<uchar>(i+1, j)==255)
+                {
+                    if((mFrame.at<uchar>(i+1,j)-value) < neightbouringDistance) mMask.at<uchar>(i, j) = 255;
+                }
+                if(mMask.at<uchar>(i, j+1)==255)
+                {
+                    if((mFrame.at<uchar>(i ,j+1)-value) < neightbouringDistance) mMask.at<uchar>(i, j) = 255;
+                }
+            }
+        }
+    }
+    imshow("mask2",mask);
 #else
     for (int i = 0; i < temp.rows; i++) {
         for (int j = 0; j < temp.cols; j++) {
