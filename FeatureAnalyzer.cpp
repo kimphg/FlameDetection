@@ -283,16 +283,110 @@ void Feature::calc(const Region& region, const Mat& frame)
 #else
     if(mTargetFrame.rows)
     {
-        Rect roi ;
-        roi.x = 0;
-        roi.y = 0;
-        roi.height = min(mTargetFrame.rows,mNewFrame.rows);
-        roi.width = min(mTargetFrame.cols,mNewFrame.cols);
-        Mat diff ; //mTargetFrame(roi)- mNewFrame(roi);
+        Rect roiTar ,roiNew;
 
-        absdiff(mTargetFrame(roi),mNewFrame(roi),diff);;
-        double frameDiff  = sum(diff)[0];
-        frameDiffVec.push_back(frameDiff/(roi.height*roi.width));
+        roiTar.height = min(mTargetFrame.rows,mNewFrame.rows);
+        roiTar.width = min(mTargetFrame.cols,mNewFrame.cols);
+        roiTar.x = 0;//(mTargetFrame.cols-roiTar.width)/2;
+        roiTar.y = 0;//(mTargetFrame.rows-roiTar.height)/2;
+        roiNew.height = roiTar.height ;
+        roiNew.width = roiTar.width ;
+        roiNew.x = 0;//(mNewFrame.cols-roiNew.width)/2;
+        roiNew.y = 0;//(mNewFrame.rows-roiNew.height)/2;
+        double frameDiff;
+        Mat diff ;
+        absdiff(mTargetFrame(roiTar),mNewFrame(roiNew),diff);
+        frameDiff  = sum(diff)[0];
+        /*
+         * double newFrameDiff =   99999998;
+        //minimize frameDiff
+        while(newFrameDiff!=frameDiff){
+            frameDiff = newFrameDiff;
+
+            double tempDiff  ;
+            enum directio{up,down,left,right,center} direction;
+            //center
+            absdiff(mTargetFrame(roiTar),mNewFrame(roiNew),diff);
+            tempDiff  = sum(diff)[0];
+            if(tempDiff<newFrameDiff)
+            {
+                newFrameDiff = tempDiff;
+                direction = center;
+            }
+            continue;
+            //down
+            if((roiTar.height+roiTar.y)<mTargetFrame.rows)
+            {
+                roiTar.y++;
+                absdiff(mTargetFrame(roiTar),mNewFrame(roiNew),diff);
+                tempDiff  = sum(diff)[0];
+                if(tempDiff<newFrameDiff)
+                {
+                    newFrameDiff = tempDiff;
+                    direction = down;
+                }
+                roiTar.y--;
+            }
+            //up
+            if((roiTar.y))
+            {
+                roiTar.y--;
+                absdiff(mTargetFrame(roiTar),mNewFrame(roiNew),diff);
+                tempDiff  = sum(diff)[0];
+                if(tempDiff<newFrameDiff)
+                {
+                    newFrameDiff = tempDiff;
+                    direction = up;
+                }
+                roiTar.y++;
+            }
+            //right
+            if((roiTar.width+roiTar.x)<mTargetFrame.cols)
+            {
+                roiTar.x++;
+                absdiff(mTargetFrame(roiTar),mNewFrame(roiNew),diff);
+                tempDiff  = sum(diff)[0];
+                if(tempDiff<newFrameDiff)
+                {
+                    newFrameDiff = tempDiff;
+                    direction = right;
+                }
+                roiTar.x--;
+            }
+            //left
+            if(roiTar.x)
+            {
+                roiTar.x--;
+                absdiff(mTargetFrame(roiTar),mNewFrame(roiNew),diff);
+                tempDiff  = sum(diff)[0];
+                if(tempDiff<newFrameDiff)
+                {
+                    newFrameDiff = tempDiff;
+                    direction = left;
+                }
+                roiTar.x++;
+            }
+
+            switch(direction)
+            {
+            case left:
+                roiTar.x--;
+                break;
+            case right:
+                roiTar.x++;
+                break;
+            case up:
+                roiTar.y--;
+                break;
+            case down:
+                roiTar.y++;
+                break;
+            case center:
+                break;
+            }
+        }
+        */
+        frameDiffVec.push_back(frameDiff/(roiTar.height*roiTar.width));
         if(frameDiffVec.size()>MAX_AREA_VEC_SIZE)
         {
             frameDiffVec.erase(frameDiffVec.begin());

@@ -419,10 +419,11 @@ void TargetExtractor::contoursAreaFilter(int smallThreshold, int largeThreshold,
         }
 
         Rect rect = boundingRect(Mat(contours[i]));
-//        if (rect.width < 0.01 * mMask.cols && rect.height < 0.01 * mMask.rows) {
-//            continue;
-//        }
-        //if((double)rect.width/rect.height>1.2)continue;
+        //loai bo cac rect o ria man hinh
+        if (rect.x < (mMask.cols/4.0))continue;
+        if ((rect.x +rect.width )> (mMask.cols*3.0/4.0))continue;
+        //loaji bo cac rect nam ngang
+        if((double)rect.width/rect.height>2.0)continue;
         indexes.push_back(i);
         areas.push_back(area);
         boundRects.push_back(rect);
@@ -522,7 +523,7 @@ bool TargetExtractor::checkRegionMatch(Region* reg1,Region* reg2)
         if(hratio<1.0)hratio = 1.0/hratio;
         double wratio = ((double)reg1->rect.width)/reg2->rect.width;
         if(wratio<1.0)wratio = 1.0/wratio;
-        if(hratio>1.2||wratio>1.2) result=false;
+        if(hratio>1.5||wratio>1.5) result=false;
     }
     return result;
 }

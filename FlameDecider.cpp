@@ -187,8 +187,8 @@ bool FlameDecider::judge(map<int, Target>& targets)
         flameDetected = isFlame;
         if (isFlame)
         {
-
-            m_Rect = it->second.region.rect;
+            it->second.feature.printValue();
+            //m_Rect = it->second.region.rect;
 //            rectangle(temp, it->second.region.rect, Scalar(0, 255, 0));
 //            // save detected frame to jpg
 //            string fileName;
