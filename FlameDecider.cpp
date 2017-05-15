@@ -62,8 +62,8 @@ void FlameDecider::userInput(const map<int, Target>& targets)
         const Feature& feature = it->second.feature;
         const Rectangle& rect = it->second.region.rect;
 #ifdef DEBUG_MODE
-        cout << "freq: " << feature.frequency << endl;
-        feature.printAreaVec();
+        //cout << "freq: " << feature.frequency << endl;
+        //feature.printAreaVec();
         feature.printValue();
         std::cout.flush();
 #endif

@@ -10,14 +10,14 @@
 #define __FlameDetection__FeatureAnalyzer__
 
 #include "common.h"
-#include "cvplot.h"
+//#include "cvplot.h"
 struct Target;
 class Region;
 
 
 class Feature {
 private:
-    Mat mNewFrame;
+
     Mat mTargetFrame;
     Mat mMask;
     double mArea;
@@ -29,6 +29,7 @@ private:
     vector<double> aspectRatioVec;
     vector<double> circularityVec;
     vector<double> squarenessVec;
+    vector<double> frameDiffVec;
     void calcColorFeature();
     void calcGeometryFeature(const Region& region);
     void calcTexture(int levels = 16, int dx = 3, int dy = 3);
@@ -54,6 +55,7 @@ public:
     double aspectRatioMean, aspectRatioVar;
     double circularityMean, circularityVar;
     double squarenessMean,  squarenessVar;
+    double frameDiffVar,frameDiffMean;
     double frequency;
     double areaVar;
     void calc(const Region& region, const Mat& frame);

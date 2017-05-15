@@ -190,23 +190,19 @@ void TargetExtractor::movementDetect(double learningRate)
     mMOG.getBackgroundImage(mBackground);
 }
 
-void TargetExtractor::colorDetect(int threshold)
+void TargetExtractor::threshDetect(int threshold)
 {
 
-    Mat temp ,mask = mMask;//= mFrame;
-    GaussianBlur(mFrame, temp, Size(3, 3), 0);
     int neightbouringDistance = 4;
-#ifdef MODE_GRAYSCALE
     //adaptiveThreshold(mFrame, mMask, 255, ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY, 21, 0);
-    for (uint i = 1; i < temp.rows; i++)
+    for (uint i = 1; i < mFrame.rows; i++)
     {
-        for (uint j = 1; j < temp.cols; j++)
+        for (uint j = 1; j < mFrame.cols; j++)
         {
             int value = mFrame.at<uchar>(i,j);
             if((value>threshold))
             {
                 mMask.at<uchar>(i, j) = 255;
-                mask.at<uchar>(i, j) = 255;
             }
             else
             {
@@ -221,12 +217,11 @@ void TargetExtractor::colorDetect(int threshold)
                         mMask.at<uchar>(i, j) = 255;
                 }
             }
-
         }
     }
-    for (uint i = temp.rows-2; i >0 ; i--)
+    for (uint i = mFrame.rows-2; i >0 ; i--)
     {
-        for (uint j = temp.cols-2; j > 0 ; j--)
+        for (uint j = mFrame.cols-2; j > 0 ; j--)
         {
             if(mMask.at<uchar>(i, j)==0)
             {
@@ -242,35 +237,7 @@ void TargetExtractor::colorDetect(int threshold)
             }
         }
     }
-    imshow("mask2",mask);
-#else
-    for (int i = 0; i < temp.rows; i++) {
-        for (int j = 0; j < temp.cols; j++) {
-            //if (mMask.at<uchar>(i, j) == 255) {
-                Vec3b& v = temp.at<Vec3b>(i, j);
-                //double s = 1 - 3.0 * min(v[0], min(v[1], v[2])) / (v[0] + v[1] + v[2]);
-//                if (!(v[2] > redThreshold
-//                      && v[2] >= v[1]
-//                      && v[1] > v[0]
-//                      && s >= ((255 - v[2]) * saturationThreshold / redThreshold)))
-//                {
-//                    mMask.at<uchar>(i, j) = 0;
-//                }
-                // dat nguong gia tri value
-                if (!(v[2] > redThreshold
-                      && v[0] > greenThreshold//
-                      && v[1] > blueThreshold))
-                {
-                    mMask.at<uchar>(i, j) = 0;
-                }
-                else
-                {
-                    mMask.at<uchar>(i, j) = 255;
-                }
-            //}
-        }
-    }
-#endif
+
 }
 void TargetExtractor::cotrastDetect(double mag)
 {
@@ -440,6 +407,7 @@ void TargetExtractor::contoursAreaFilter(int smallThreshold, int largeThreshold,
     // this will change mMask, but it doesn't matter
     findContours(mMask, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
 
+
     vector<int> indexes;
     vector<double> areas;
     vector<Rect> boundRects;
@@ -472,7 +440,6 @@ void TargetExtractor::contoursAreaFilter(int smallThreshold, int largeThreshold,
         if (*it == 0) {
             break;
         }
-
         vector<double>::difference_type offset = it - areas.begin();
         int index = indexes[offset];
         drawContours(mMask, contours, index, Scalar::all(255), CV_FILLED);
@@ -487,6 +454,7 @@ void TargetExtractor::contoursAreaFilter(int smallThreshold, int largeThreshold,
         *it = 0;
         keep--;
     }
+
 }
 
 void TargetExtractor::accumulate(int threshold)
@@ -753,11 +721,9 @@ void TargetExtractor::extract(const Mat& frame, map<int, Target>& targets, bool 
     mMask = cv::Mat::zeros(Size(mFrame.cols,mFrame.rows), CV_8UC1);
 
     //int thresh = mConfig._config.brightThreshold;
-    colorDetect(mConfig._config.brightThreshold);
+    threshDetect(mConfig._config.brightThreshold);
     //cotrastDetect(1.5);
-#ifdef DEBUG_MODE
-    imshow("mask", mMask);
-#endif
+
     //denoise(7, 5);
     //fill(7, 5);
     //medianBlur(mMask, mMask, 3);
@@ -778,10 +744,8 @@ void TargetExtractor::extract(const Mat& frame, map<int, Target>& targets, bool 
 
     contoursAreaFilter(mConfig._config.smallArea, mConfig._config.largeArea, mConfig._config.keepCount);
 
-#ifdef TRAIN_MODE
-    namedWindow("mask");
-   // moveWindow("mask", 600, 10);
-    imshow("mask", mMask);
+#ifdef DEBUG_MODE
+    imshow("maskfinal", mMask);
 #endif
     if (track) {
         blobTrack(targets);
