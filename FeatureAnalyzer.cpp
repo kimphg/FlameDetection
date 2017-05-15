@@ -272,11 +272,23 @@ Feature::Feature()
 
 void Feature::calc(const Region& region, const Mat& frame)
 {
-    mROI = frame(region.rect);
+    mNewFrame = frame(region.rect);
 #ifndef MODE_GRAYSCALE
     cvtColor(mROI, mGray, CV_BGR2GRAY);
 #else
-    mTargetFrame = mROI;
+    if(mTargetFrame.rows)
+    {
+        Rect roi ;
+        roi.x = 0;
+        roi.y = 0;
+        roi.height = min(mTargetFrame.rows,mNewFrame.rows);
+        roi.width = min(mTargetFrame.cols,mNewFrame.cols);
+        mTargetFrame = mTargetFrame(roi);
+        mNewFrame = mNewFrame(roi);
+        Mat diff = mTargetFrame- mNewFrame;
+        imshow("diff",diff);
+    }
+    mTargetFrame = mNewFrame;
 #endif
     const Mat& mask = videoHandler->getDetector().getExtractor().getMask();
     mMask = mask(region.rect);

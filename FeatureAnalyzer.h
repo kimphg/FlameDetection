@@ -17,7 +17,7 @@ class Region;
 
 class Feature {
 private:
-    Mat mROI;
+    Mat mNewFrame;
     Mat mTargetFrame;
     Mat mMask;
     double mArea;
