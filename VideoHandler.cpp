@@ -133,7 +133,7 @@ int VideoHandler::handle()
         }
 
         resize(mOrgFrame, mOrgFrame, cvSize(mConfig._config.frmWidth, mConfig._config.frmHeight));
-        imshow("original", mOrgFrame);
+        //imshow("original", mOrgFrame);
 
 #ifdef MODE_GRAYSCALE
         cv::cvtColor(mOrgFrame,mFrame, CV_BGRA2GRAY);
@@ -189,8 +189,8 @@ bool VideoHandler::saveFrame()
 //        return false;
 //    if ((mDetector.m_Rect.x +mDetector.m_Rect.width )> (mConfig._config.frmWidth*2/3))
 //        return false;
-//    if ((mDetector.m_Rect.y + mDetector.m_Rect.height) >= (mConfig._config.frmHeight - mConfig._config.cropY - 2))
-//        return false;
+    if ((mDetector.m_Rect.y + mDetector.m_Rect.height) >= (mConfig._config.frmHeight - mConfig._config.cropY - 2))
+        return false;
 
     // save detected frame to jpg
     string fileName;
