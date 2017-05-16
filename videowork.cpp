@@ -104,7 +104,7 @@ void VideoWork::doWork()
             resize(mFrame, mFrame, cvSize(mConfig._config.frmWidth, mConfig._config.frmHeight));
             //imshow("original", mFrame);
 
-            waitKey(10);
+            waitKey(80);
            // phan code duoc bao ve
         }catch(...)
         {
