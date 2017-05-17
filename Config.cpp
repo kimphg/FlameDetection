@@ -33,6 +33,8 @@ void CConfig::LoadXmlFile()
 
     //_config.strCamUrl        = cvReadStringByName(fs, 0, "CamUrl", "rtsp://192.168.0.253:554/stream1"); // for K9-Camera: "rtsp://service:12345678@192.168.100.100:554/"
     _config.strCamUrl        = cvReadStringByName(fs, 0, "CamUrl", "rtsp://service:12345678@192.168.100.100:554/");
+    _config.strCamUrl2        = cvReadStringByName(fs, 0, "CamUrl2", "rtsp://service:12345678@192.168.100.101:554/");
+    _config.strCamUrl3        = cvReadStringByName(fs, 0, "CamUrl3", "rtsp://service:12345678@192.168.100.102:554/");
     _config.frmPosX          = cvReadIntByName(fs, 0, "FrmPosX", 0);
     _config.frmPosY          = cvReadIntByName(fs, 0, "FrmPosY", 0);
     _config.frmWidth         = cvReadIntByName(fs, 0, "FrmWidth", 600);
@@ -53,6 +55,8 @@ void CConfig::setDefault()
 {
     //_config.strCamUrl       = "rtsp://192.168.0.253:554/stream1"; // for K9-Camera: "rtsp://service:12345678@192.168.100.100:554/"
     _config.strCamUrl       = "rtsp://service:12345678@192.168.100.100:554/";
+    _config.strCamUrl2       = "rtsp://service:12345678@192.168.100.101:554/";
+    _config.strCamUrl3       = "rtsp://service:12345678@192.168.100.102:554/";
     _config.frmPosX         = 0;
     _config.frmPosY         = 0;
     _config.frmWidth        = 600;
@@ -75,6 +79,8 @@ void CConfig::SaveXmlFile()
     CvFileStorage* fs = cvOpenFileStorage(XML_FILE, 0, CV_STORAGE_WRITE);
 
     cvWriteString(fs, "CamUrl", _config.strCamUrl.data());
+    cvWriteString(fs, "CamUrl2", _config.strCamUrl.data());
+    cvWriteString(fs, "CamUrl3", _config.strCamUrl.data());
     cvWriteInt(fs, "FrmPosX", _config.frmPosX);
     cvWriteInt(fs, "FrmPosY", _config.frmPosY);
     cvWriteInt(fs, "FrmWidth", _config.frmWidth);

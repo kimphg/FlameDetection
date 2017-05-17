@@ -15,7 +15,7 @@
 
 struct Config_t
 {
-    std::string strCamUrl;
+    std::string strCamUrl, strCamUrl2, strCamUrl3;
     short frmPosX, frmPosY, frmWidth, frmHeight, smallArea, largeArea, keepCount, brightThreshold, cropX, cropY, alarmNumber;
     double movDetect;
 };

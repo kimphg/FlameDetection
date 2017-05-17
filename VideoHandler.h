@@ -14,6 +14,7 @@
 #include "FlameDetector.h"
 #include "Config.h"
 #include "videowork.h"
+//#include "videowork1.h"
 #include "QSound"
 #include <QUdpSocket>
 class VideoHandler {
@@ -22,7 +23,7 @@ private:
     static const int MAX_EXTRA_FRAME_COUNT = 80;
     QUdpSocket      *alarmSocket;
     VideoCapture mCapture;
-    FlameDetector mDetector;
+    //FlameDetector mDetector;
     Mat mOrgFrame,  mFrame;
     bool mFromCam;
     bool mSaveVideo;
@@ -34,25 +35,38 @@ private:
     bool saveFrame();
 
     QThread         *m_thread;
-    VideoWork       *m_worker;
+    //VideoWork       *m_worker;
+
+    QThread         *m_thread2;
+    //VideoWork       *m_worker2;
+
+    QThread         *m_thread3;
+    //VideoWork       *m_worker3;
+
 
     
-    void ActivateAlarm();
-    void DeactivateAlarm();
+
 public:
     static const int STATUS_FLAME_DETECTED = 0;
     static const int STATUS_OPEN_CAP_FAILED = 1;
     static const int STATUS_NO_FLAME_DETECTED = 2;
 
+    int mVideoChannel;
+
 //    VideoHandler(int device, bool saveKeyFrame = false, bool saveVideo = false);
 //    VideoHandler(const string& file, bool saveKeyFrame = false);
 
+
+    FlameDetector mDetector;
     VideoHandler(int device);
     VideoHandler(const string& file);
     
     const FlameDetector& getDetector() const { return mDetector; }
     double getVideoFPS() const { return mVideoFPS; }
     int handle();
+
+    void ActivateAlarm();
+    void DeactivateAlarm();
 };
 
 #endif /* defined(__FlameDetection__VideoHandler__) */

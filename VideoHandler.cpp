@@ -9,6 +9,10 @@
 #include "VideoHandler.h"
 
 extern CConfig mConfig;
+VideoWork       *m_worker = NULL;
+VideoWork       *m_worker2 = NULL;
+VideoWork       *m_worker3 = NULL;
+QSound sound("alarm.wav");
 
 VideoHandler::VideoHandler(int device)
 : mCapture(device)
@@ -21,6 +25,8 @@ VideoHandler::VideoHandler(const string& file)
 }
 void VideoHandler::ActivateAlarm()
 {
+    if (sound.isFinished())
+    sound.play();
     unsigned char message[5];
     message[0]=0xff;
     message[1]=0xff;
@@ -40,82 +46,54 @@ void VideoHandler::DeactivateAlarm()
     alarmSocket->writeDatagram((char*)&message[0],5, QHostAddress("192.168.100.255") , 8888);
 }
 int VideoHandler::handle()
-{
+{    
    // TCPClient client;
     //client.start("127.0.0.1", 8888);
+    mVideoChannel = 0;
     alarmSocket = new QUdpSocket();
     bool continueToDetect = true;
-    int extraFrameCount = 0;
+    int extraFrameCount = 0;    
 
     Rect mROI(mConfig._config.cropX, mConfig._config.cropY, mConfig._config.frmWidth - (2*mConfig._config.cropX),
                  mConfig._config.frmHeight - (2*mConfig._config.cropY));
 
-    QSound sound("alarm.wav");
     sound.setLoops(15);
-
 
     // The thread and the worker are created in the constructor so it is always safe to delete them.
 #ifdef MODE_MULTITHREAD
     mCapture.release();
+    // first thread
     m_thread = new QThread();
     m_worker = new VideoWork();
     m_worker->moveToThread(m_thread);
     QObject::connect(m_worker, SIGNAL(workRequested()), m_thread, SLOT(start()));
     QObject::connect(m_thread, SIGNAL(started()), m_worker, SLOT(doWork()));
-    QObject::connect(m_worker, SIGNAL(finished()), m_thread, SLOT(quit()), Qt::DirectConnection);    
-
+    QObject::connect(m_worker, SIGNAL(finished()), m_thread, SLOT(quit()), Qt::DirectConnection);
     m_worker->abort();
     m_thread->wait();
     m_worker->requestWork();
 
-    while (continueToDetect)
-    {        
-        m_worker->m_Frame.copyTo(mOrgFrame);
-        if (mOrgFrame.empty())
-            continue;
+    // second thread
+    m_thread2 = new QThread();
+    m_worker2 = new VideoWork();
+    m_worker2->moveToThread(m_thread2);
+    QObject::connect(m_worker2, SIGNAL(workRequested()), m_thread2, SLOT(start()));
+    QObject::connect(m_thread2, SIGNAL(started()), m_worker2, SLOT(doWork2()));
+    QObject::connect(m_worker2, SIGNAL(finished()), m_thread2, SLOT(quit()), Qt::DirectConnection);
+    m_worker2->abort();
+    m_thread2->wait();
+    m_worker2->requestWork();
 
-#ifdef MODE_GRAYSCALE
-            cv::cvtColor(mOrgFrame, mFrame, CV_BGRA2GRAY);
-#endif
-
-            mFrame = mFrame(mROI);
-
-        if (m_worker->m_IsFinished)
-            return 0;
-
-        if (true)
-        {
-            if (mDetector.detect(mFrame))
-            {
-                if (saveFrame())
-                {
-                    if (sound.isFinished())
-                        sound.play();
-                    this->ActivateAlarm();
-                }
-                cout << "Flame detected." << endl;
-
-            }
-
-            imshow("result", mOrgFrame);
-        }
-        else if (++extraFrameCount >= MAX_EXTRA_FRAME_COUNT)
-        {
-            return STATUS_FLAME_DETECTED;
-        }
-#ifdef TRAIN_MODE
-        if (trainComplete) {
-            cout << "Train complete." << endl;
-            break;
-        }
-#endif
-        if (waitKey(WAIT_INTERVAL) == 27) {
-            cout << "User abort." << endl;
-            break;
-        }
-    }
-
-    return STATUS_NO_FLAME_DETECTED;
+    // third thread
+    m_thread3 = new QThread();
+    m_worker3 = new VideoWork();
+    m_worker3->moveToThread(m_thread3);
+    QObject::connect(m_worker3, SIGNAL(workRequested()), m_thread3, SLOT(start()));
+    QObject::connect(m_thread3, SIGNAL(started()), m_worker3, SLOT(doWork3()));
+    QObject::connect(m_worker3, SIGNAL(finished()), m_thread3, SLOT(quit()), Qt::DirectConnection);
+    m_worker3->abort();
+    m_thread3->wait();
+    m_worker3->requestWork();
 
     return 0;
 #endif
@@ -149,13 +127,12 @@ int VideoHandler::handle()
             {
                 if(saveFrame())
                 {
-                    if (sound.isFinished())
-                    sound.play();
+//                    if (sound.isFinished())
+//                    sound.play();
                     this->ActivateAlarm();
                     cout << "Flame detected." << endl;
                 }
             }
-
 
             imshow("result", mOrgFrame);
 

@@ -10,8 +10,12 @@
 #include "VideoHandler.h"
 #include "FlameDetector.h"
 #include "TargetExtractor.h"
+#include "videowork.h"
 
 extern VideoHandler* videoHandler;
+extern VideoWork *m_worker;
+extern VideoWork *m_worker2;
+extern VideoWork *m_worker3;
 
 /**************** Feature ****************/
 
@@ -276,8 +280,31 @@ Feature::Feature()
 void Feature::calc(const Region& region, const Mat& frame)
 {
     Mat mNewFrame = frame(region.rect);
-    const Mat& mask = videoHandler->getDetector().getExtractor().getMask();
-    mMask = mask(region.rect);
+    //const Mat& mask = videoHandler->getDetector().getExtractor().getMask();
+
+    if (videoHandler->mVideoChannel == 2)
+    {
+        const Mat& mask = m_worker2->getDetector().getExtractor().getMask();
+        mMask = mask(region.rect);
+    }
+    else if (videoHandler->mVideoChannel == 3)
+    {
+        const Mat& mask = m_worker3->getDetector().getExtractor().getMask();
+        mMask = mask(region.rect);
+    }
+    else if (videoHandler->mVideoChannel == 1)
+    {
+        const Mat& mask = m_worker->getDetector().getExtractor().getMask();
+        mMask = mask(region.rect);
+    }
+    else  //(videoHandler->mVideoChannel == 0) // default - for Training mode
+    {
+        const Mat& mask = videoHandler->getDetector().getExtractor().getMask();
+        mMask = mask(region.rect);
+
+    }
+
+
 #ifndef MODE_GRAYSCALE
     cvtColor(mROI, mGray, CV_BGR2GRAY);
 #else

@@ -18,7 +18,7 @@ SOURCES += main.cpp \
     FlameDetector.cpp \
     TargetExtractor.cpp \
     Config.cpp \
-    videowork.cpp \
+    videowork.cpp
 
 
 #INCLUDEPATH += $$PWD/../opencv/build/include
