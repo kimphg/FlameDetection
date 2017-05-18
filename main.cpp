@@ -34,6 +34,7 @@ int main(int argc, char *argv[])
             cout << "No flame detected." << endl;
             break;
         default:
+            cout << "Connected! Detecting flames..." << endl;
             break;
         }
 

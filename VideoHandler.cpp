@@ -95,7 +95,7 @@ int VideoHandler::handle()
     m_thread3->wait();
     m_worker3->requestWork();
 
-    return 0;
+    return 3;
 #endif
 
     if (!mCapture.isOpened()) {

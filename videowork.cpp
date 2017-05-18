@@ -21,7 +21,7 @@ void VideoWork::requestWork()
     m_mutex.lock();
     m_working = true;
     m_abort = false;
-    qDebug()<<"Request worker start in Thread "<<thread()->currentThreadId();
+    qDebug()<<"Connect to Camera...";
     m_mutex.unlock();
     emit workRequested();
 }
