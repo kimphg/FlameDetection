@@ -112,8 +112,11 @@ void Feature::calcGeometryFeature(const Region& region)
             }
         }
     }
+    int areaTotal = mTargetFrame.rows*mTargetFrame.cols;
+    if(!countInside) diffInOut = 0;
+    if(countInside>=areaTotal)diffInOut = 0;
     avrInside/=countInside;
-    avrOutside/=(mTargetFrame.rows*mTargetFrame.cols-countInside);
+    avrOutside/=(areaTotal-countInside);
     double new_diffInOut = avrInside-avrOutside;
     diffInOut += (new_diffInOut-diffInOut)/5.0;
     //if(diffInOut<60)dataReady = false;
@@ -468,6 +471,18 @@ void Feature::printValue() const
            << texture[1]<<" texture\n "
            << texture[2]<<" texture\n "
            << texture[3]<<" texture\n";
+}
+
+bool Feature::checkValid()
+{
+    if(circularityMean
+            *squarenessMean
+            *aspectRatioMean
+            *frameDiffMean
+            *circularityVar
+            *squarenessVar*aspectRatioVar*roughness*diffInOut*texture[0]*texture[1]*texture[2]*texture[3])
+        return true;
+        return false;
 }
 
 Feature::operator Mat() const

@@ -423,7 +423,7 @@ void TargetExtractor::contoursAreaFilter(int smallThreshold, int largeThreshold,
         if (rect.x < (50))continue;
         if ((rect.x +rect.width )> (mMask.cols-50))continue;
         //loaji bo cac rect nam ngang
-        if((double)rect.width/rect.height>2.0)continue;
+        if((double)rect.width/rect.height>1.0)continue;
         indexes.push_back(i);
         areas.push_back(area);
         boundRects.push_back(rect);

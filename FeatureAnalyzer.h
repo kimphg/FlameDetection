@@ -61,6 +61,7 @@ public:
     void calc(const Region& region, const Mat& frame);
     static void merge(const vector<const Feature*>& src, Feature& feature);
     void printValue()const;
+    bool checkValid();
     operator Mat() const;
 
 public:

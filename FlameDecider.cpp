@@ -178,6 +178,7 @@ bool FlameDecider::judge(map<int, Target>& targets)
 
         if(!it->second.feature.dataReady)continue;
         if(it->second.times<100)continue;
+        if(!it->second.feature.checkValid()){it->second.times = 0;continue;}
         bool isFlame = svmPredict(it->second.feature);
         if(!it->second.isFlame)
         {
@@ -188,6 +189,7 @@ bool FlameDecider::judge(map<int, Target>& targets)
         if (isFlame)
         {
             it->second.feature.printValue();
+
             m_Rect = it->second.region.rect;
             if(flameDetected)
             {
