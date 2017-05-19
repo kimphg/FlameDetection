@@ -66,6 +66,10 @@ win32:CONFIG(release, debug|release):LIBS += -L"D:/OpenCV/OpenCV2411/build/x86/v
 win32:CONFIG(release, debug|release):LIBS += -L"D:/OpenCV/OpenCV2411/build/x86/vc10/lib/" -lopencv_video2411
 win32:CONFIG(release, debug|release):LIBS += -L"D:/OpenCV/OpenCV2411/build/x86/vc10/lib/" -lopencv_videostab2411
 
+#win32:RC_FILE += FlameDetection.rc
+
+RC_FILE = FlameDetection.rc
+
 HEADERS += \
     common.h \
     utils.h \
