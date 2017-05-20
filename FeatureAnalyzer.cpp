@@ -114,11 +114,14 @@ void Feature::calcGeometryFeature(const Region& region)
     }
     int areaTotal = mTargetFrame.rows*mTargetFrame.cols;
     if(!countInside) diffInOut = 0;
-    if(countInside>=areaTotal)diffInOut = 0;
-    avrInside/=countInside;
-    avrOutside/=(areaTotal-countInside);
-    double new_diffInOut = avrInside-avrOutside;
-    diffInOut += (new_diffInOut-diffInOut)/5.0;
+    else if(countInside>=areaTotal)diffInOut = 0;
+    else
+    {
+        avrInside/=countInside;
+        avrOutside/=(areaTotal-countInside);
+        double new_diffInOut = avrInside-avrOutside;
+        diffInOut += (new_diffInOut-diffInOut)/5.0;
+    }
     //if(diffInOut<60)dataReady = false;
     if (dataReady)
     {

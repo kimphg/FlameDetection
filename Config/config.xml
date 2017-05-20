@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<opencv_storage>
+<CamUrl>rtsp://service:12345678@192.168.100.100:554/</CamUrl>
+<CamUrl2>rtsp://service:12345678@192.168.100.100:554/</CamUrl2>
+<CamUrl3>rtsp://service:12345678@192.168.100.100:554/</CamUrl3>
+<FrmPosX>0</FrmPosX>
+<FrmPosY>0</FrmPosY>
+<FrmWidth>600</FrmWidth>
+<FrmHeight>500</FrmHeight>
+<SmallArea>200</SmallArea>
+<LargeArea>4900</LargeArea>
+<KeepCount>2</KeepCount>
+<MovDetect>-1.</MovDetect>
+<BrightThreshold>235</BrightThreshold>
+<CropX>50</CropX>
+<CropY>35</CropY>
+<AlarmNumber>1</AlarmNumber>
+</opencv_storage>
