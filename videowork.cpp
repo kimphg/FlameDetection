@@ -21,7 +21,7 @@ void VideoWork::requestWork()
     m_mutex.lock();
     m_working = true;
     m_abort = false;
-    qDebug()<<"Connect to Camera...";
+    //qDebug()<<"Connect to Camera...";
     m_mutex.unlock();
     emit workRequested();
 }
@@ -58,6 +58,8 @@ void VideoWork::doWork()
 
         emit finished();
     }    
+
+    qDebug()<<"Connected to Camera - 01...";
 
     while(true)
     {
@@ -156,6 +158,8 @@ void VideoWork::doWork2()
         emit finished();
     }
 
+    qDebug()<<"Connected to Camera - 02...";
+
     while(true)
     {
         // Checks if the process should be aborted
@@ -253,6 +257,8 @@ void VideoWork::doWork3()
 
         emit finished();
     }
+
+    qDebug()<<"Connected to Camera - 03...";
 
     while(true)
     {
