@@ -478,14 +478,15 @@ void Feature::printValue() const
 
 bool Feature::checkValid()
 {
-    if(circularityMean
+    if(diffInOut<75.0||frameDiffMean<6.0)return false;
+    if(!circularityMean
             *squarenessMean
             *aspectRatioMean
             *frameDiffMean
             *circularityVar
             *squarenessVar*aspectRatioVar*roughness*diffInOut*texture[0]*texture[1]*texture[2]*texture[3])
-        return true;
         return false;
+        return true;
 }
 
 Feature::operator Mat() const
