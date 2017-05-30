@@ -511,6 +511,7 @@ void TargetExtractor::addNewTarget(map<int, Target>& targets,Region reg)
     targets[id].region = reg;
     targets[id].times=1;
     targets[id].lostTimes=0;
+    targets[id].flameCount=0;
     targets[id].isFlame=0;
     targets[id].isSaved=false;
 }

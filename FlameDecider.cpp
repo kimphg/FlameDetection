@@ -185,7 +185,13 @@ bool FlameDecider::judge(map<int, Target>& targets)
             it->second.isFlame = isFlame;
 
         }
-        flameDetected = isFlame;
+        if(isFlame)
+        {it->second.flameCount++;}
+        else
+        {
+            if(it->second.flameCount)it->second.flameCount--;
+        }
+        flameDetected = (it->second.flameCount>5);
         if (isFlame)
         {
             it->second.feature.printValue();

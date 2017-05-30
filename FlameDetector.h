@@ -28,6 +28,7 @@ struct Target {
     Region region;
     Feature feature;
     bool isFlame;
+    int flameCount;
     bool isSaved;
 };
 
@@ -47,6 +48,8 @@ private:
     int mFlameCount;
     bool mTrack;
     
+    void StopCamera();
+    void StartCamera();
 public:
     FlameDetector();
     
