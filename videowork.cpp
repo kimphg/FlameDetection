@@ -14,8 +14,31 @@ VideoWork::VideoWork(QObject *parent) : QObject(parent)
 {
     m_working =false;
     m_abort = false;
+    qnam = new QNetworkAccessManager(this);
 }
+void VideoWork::StopCamera(QString ipadr)
+{
 
+    QNetworkRequest request(QUrl("http://service:12345678@"+ipadr+"/rcp.xml?command=0x09A5&type=P_OCTET&direction=WRITE&num=1&payload=0x800006011085000000"));
+    reply = qnam->get(request);
+
+    QNetworkRequest rq(QUrl("http://service:12345678@192.168.100.101/rcp.xml?command=0x09A5&type=P_OCTET&direction=WRITE&num=1&payload=0x800006011085000000"));
+    reply = qnam->get(rq);
+    QEventLoop loop;
+    connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+    loop.exec();
+}
+void VideoWork::StartCamera(QString ipadr)
+{
+    //qnam = new QNetworkAccessManager();
+    reply = qnam->get(QNetworkRequest(QUrl("http://service:12345678@"
+    +ipadr+"/rcp.xml?command=0x09A5&type=P_OCTET&direction=WRITE&num=1&payload=0x800006011085010000")));
+    QNetworkRequest rq(QUrl("http://service:12345678@192.168.100.101/rcp.xml?command=0x09A5&type=P_OCTET&direction=WRITE&num=1&payload=0x800006011085010000"));
+    reply = qnam->get(rq);
+    QEventLoop loop;
+    connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+    loop.exec();
+}
 void VideoWork::requestWork()
 {
     m_mutex.lock();
@@ -36,10 +59,27 @@ void VideoWork::abort()
     m_mutex.unlock();
 }
 
+void VideoWork::onTimer()
+{
+//    mDetector.StartCamera(QString::fromStdString(mConfig._config.strCamUrl));
+//    mDetector.StartCamera(QString::fromStdString(mConfig._config.strCamUrl2));
+//    mDetector.StartCamera(QString::fromStdString(mConfig._config.strCamUrl));
+//    mDetector.StartCamera(QString::fromStdString(mConfig._config.strCamUrl2));
+//    mDetector.StartCamera(QString::fromStdString(mConfig._config.strCamUrl));
+//    mDetector.StartCamera(QString::fromStdString(mConfig._config.strCamUrl2));
+    StopCamera("192.168.100.101");
+    StopCamera("192.168.100.100");
+    StopCamera("192.168.100.101");
+    StopCamera("192.168.100.100");
+    StopCamera("192.168.100.101");
+    StopCamera("192.168.100.100");
+}
 void VideoWork::doWork()
 {
-    VideoCapture mCapture(mConfig._config.strCamUrl);
-
+    std::string url = mConfig._config.strCamUrl;
+    //QTimer::singleShot(500, this, SLOT(onTimer()));
+    onTimer();
+    VideoCapture mCapture(url);
     Mat mFrame;    
     Rect mROI(mConfig._config.cropX, mConfig._config.cropY, mConfig._config.frmWidth - (2*mConfig._config.cropX),
                  mConfig._config.frmHeight - (2*mConfig._config.cropY));
@@ -60,10 +100,11 @@ void VideoWork::doWork()
     }    
 
     qDebug()<<"Connected to Camera - 01...";
-
+    int flameRecently = 0;
     while(true)
     {
         // Checks if the process should be aborted
+
         m_mutex.lock();
         bool abort = m_abort;
         m_mutex.unlock();
@@ -105,12 +146,20 @@ void VideoWork::doWork()
 
                 if (mDetector.detect(mFrame))
                 {
+                    StopCamera(QString::fromStdString(url));
+                    flameRecently = 50;
                     if(saveFrame())
                     {                        
                         videoHandler->ActivateAlarm();
                         cout << "Flame detected." << endl;
                     }
 
+                }
+                else
+                {
+                    if(flameRecently>-1)flameRecently--;
+                    if(flameRecently==0)
+                        StartCamera(QString::fromStdString(url));
                 }
             }            
 
@@ -137,7 +186,8 @@ void VideoWork::doWork()
 
 void VideoWork::doWork2()
 {    
-    VideoCapture mCapture(mConfig._config.strCamUrl2);
+    std::string url = mConfig._config.strCamUrl2;
+    VideoCapture mCapture(url);
 
     Mat mFrame;
     Rect mROI(mConfig._config.cropX, mConfig._config.cropY, mConfig._config.frmWidth - (2*mConfig._config.cropX),
@@ -159,7 +209,7 @@ void VideoWork::doWork2()
     }
 
     qDebug()<<"Connected to Camera - 02...";
-
+    int flameRecently=0;
     while(true)
     {
         // Checks if the process should be aborted
@@ -204,13 +254,20 @@ void VideoWork::doWork2()
 
                 if (mDetector.detect(mFrame))
                 {
-
+                    StopCamera(QString::fromStdString(url));
+                    flameRecently = 50;
                     if(saveFrame())
                     {
                         videoHandler->ActivateAlarm();
                         cout << "Flame detected." << endl;
                     }
 
+                }
+                else
+                {
+                    if(flameRecently>-1)flameRecently--;
+                    if(flameRecently==0)
+                        StartCamera(QString::fromStdString(url));
                 }
             }
 
@@ -237,7 +294,8 @@ void VideoWork::doWork2()
 
 void VideoWork::doWork3()
 {
-    VideoCapture mCapture(mConfig._config.strCamUrl3);
+    std::string url = mConfig._config.strCamUrl3;
+    VideoCapture mCapture(url);
 
     Mat mFrame;
     Rect mROI(mConfig._config.cropX, mConfig._config.cropY, mConfig._config.frmWidth - (2*mConfig._config.cropX),
@@ -259,7 +317,7 @@ void VideoWork::doWork3()
     }
 
     qDebug()<<"Connected to Camera - 03...";
-
+    int flameRecently = 0;
     while(true)
     {
         // Checks if the process should be aborted
@@ -295,22 +353,28 @@ void VideoWork::doWork3()
             cv::cvtColor(mFrame,mFrame, CV_BGRA2GRAY);
 #endif
             mFrame = mFrame(mROI);
-
             if (true)//xu ly 3 frame 1 lan
             {
                 m_mutex.lock();
-                videoHandler->mVideoChannel = 3;
+                videoHandler->mVideoChannel = 1;
                 m_mutex.unlock();
 
                 if (mDetector.detect(mFrame))
                 {
-
+                    StopCamera(QString::fromStdString(url));
+                    flameRecently = 50;
                     if(saveFrame())
                     {
                         videoHandler->ActivateAlarm();
                         cout << "Flame detected." << endl;
                     }
 
+                }
+                else
+                {
+                    if(flameRecently>-1)flameRecently--;
+                    if(flameRecently==0)
+                        StartCamera(QString::fromStdString(url));
                 }
             }
 

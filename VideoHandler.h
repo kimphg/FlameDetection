@@ -21,7 +21,7 @@ class VideoHandler {
 private:
     static const int WAIT_INTERVAL = 30;
     static const int MAX_EXTRA_FRAME_COUNT = 80;
-    QUdpSocket      *alarmSocket;
+
     VideoCapture mCapture;
     //FlameDetector mDetector;
     Mat mOrgFrame,  mFrame;

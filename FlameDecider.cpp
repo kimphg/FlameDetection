@@ -186,22 +186,21 @@ bool FlameDecider::judge(map<int, Target>& targets)
 
         }
         if(isFlame)
-        {it->second.flameCount++;}
+        { it->second.flameCount++; }
         else
         {
             if(it->second.flameCount)it->second.flameCount--;
         }
-        flameDetected = (it->second.flameCount>5);
-        if (isFlame)
+        flameDetected = (it->second.flameCount>4);
+        if (flameDetected)
         {
             it->second.feature.printValue();
 
             m_Rect = it->second.region.rect;
-            if(flameDetected)
-            {
-                ofstream ofs("detection.txt", ios::app);
-                ofs << it->second.feature << false << endl;
-            }
+
+            ofstream ofs("detection.txt", ios::app);
+            ofs << it->second.feature << false << endl;
+
 //            rectangle(temp, it->second.region.rect, Scalar(0, 255, 0));
 //            // save detected frame to jpg
 //            string fileName;

@@ -5,6 +5,7 @@
 #include <QtCore>
 #include <QMutex>
 #include <QMessageBox>
+#include <QNetworkReply>
 #include "QSound"
 
 #include "common.h"
@@ -36,7 +37,11 @@ private:
     QMutex  m_mutex;
     FlameDetector mDetector;
     Mat     m_Frame;
+    QNetworkReply *reply;
+    QNetworkAccessManager *qnam;
 
+    void StopCamera(QString ipadr);
+    void StartCamera(QString ipadr);
 signals:
     void workRequested();
     void finished();
@@ -50,7 +55,8 @@ public slots:
 
 signals:
 
-public slots:
+private slots:
+    void onTimer();
 };
 
 #endif // VIDEOWORK_H

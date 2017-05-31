@@ -48,8 +48,7 @@ private:
     int mFlameCount;
     bool mTrack;
     
-    void StopCamera();
-    void StartCamera();
+
 public:
     FlameDetector();
     

@@ -25,6 +25,7 @@ VideoHandler::VideoHandler(const string& file)
 }
 void VideoHandler::ActivateAlarm()
 {
+    QUdpSocket      alarmSocket;
     if (sound.isFinished())
     sound.play();
     unsigned char message[5];
@@ -33,24 +34,25 @@ void VideoHandler::ActivateAlarm()
     message[2]=0xff;
     message[3]= mConfig._config.alarmNumber;
     message[4]=0xff;
-    alarmSocket->writeDatagram((char*)&message[0],5, QHostAddress("192.168.100.255") , 8888);
+    alarmSocket.writeDatagram((char*)&message[0],5, QHostAddress("192.168.100.255") , 8888);
 }
 void VideoHandler::DeactivateAlarm()
 {
+    QUdpSocket      alarmSocket;
     unsigned char message[5];
     message[0]= 0xff;
     message[1]= 0xff;
     message[2]= 0xff;
     message[3]= mConfig._config.alarmNumber;
     message[4]= 0x00;
-    alarmSocket->writeDatagram((char*)&message[0],5, QHostAddress("192.168.100.255") , 8888);
+    alarmSocket.writeDatagram((char*)&message[0],5, QHostAddress("192.168.100.255") , 8888);
 }
 int VideoHandler::handle()
 {    
    // TCPClient client;
     //client.start("127.0.0.1", 8888);
     mVideoChannel = 0;
-    alarmSocket = new QUdpSocket();
+    //alarmSocket = new QUdpSocket();
     bool continueToDetect = true;
     int extraFrameCount = 0;    
 
