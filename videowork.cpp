@@ -18,7 +18,7 @@ VideoWork::VideoWork(QObject *parent) : QObject(parent)
 }
 void VideoWork::StopCamera(QString ipadr)
 {
-    StartCamera(ipadr);
+    //StartCamera(ipadr);
     printf("stop cam \n");
 
     QNetworkRequest request(QUrl("http://service:12345678@"+ipadr+"/rcp.xml?command=0x09A5&type=P_OCTET&direction=WRITE&num=1&payload=0x800006011085000000"));
@@ -32,7 +32,7 @@ void VideoWork::StopCamera(QString ipadr)
 }
 void VideoWork::StartCamera(QString ipadr)
 {
-    StopCamera(ipadr);
+    //StopCamera(ipadr);
     printf("start cam \n");
 
     //qnam = new QNetworkAccessManager();
@@ -156,7 +156,9 @@ void VideoWork::doWork()
                 if(res>6)videoHandler->ActivateAlarm();
                 if (res>4)
                 {
+                    StartCamera("192.168.100.100");
                     StopCamera("192.168.100.100");
+
                     flameRecently = 20;
                     if(saveFrame())
                     {                        
@@ -169,7 +171,10 @@ void VideoWork::doWork()
                 {
                     if(flameRecently>-1)flameRecently--;
                     if(flameRecently==0)
+                    {
+                        StopCamera("192.168.100.100");
                         StartCamera("192.168.100.100");
+                    }
                 }
 
             }            
@@ -268,8 +273,9 @@ void VideoWork::doWork2()
                 if(res>6)videoHandler->ActivateAlarm();
                 if (res>4)
                 {
+                    StartCamera("192.168.100.101");
                     StopCamera("192.168.100.101");
-                    flameRecently = 50;
+                    flameRecently = 20;
                     if(saveFrame())
                     {
                         videoHandler->ActivateAlarm();
@@ -281,7 +287,11 @@ void VideoWork::doWork2()
                 {
                     if(flameRecently>-1)flameRecently--;
                     if(flameRecently==0)
+
+                    {
+                        StopCamera("192.168.100.101");
                         StartCamera("192.168.100.101");
+                    }
                 }
             }
 
@@ -376,6 +386,7 @@ void VideoWork::doWork3()
                 if(res>6)videoHandler->ActivateAlarm();
                 if (res>4)
                 {
+                    StartCamera("192.168.100.102");
                     StopCamera("192.168.100.102");
                     flameRecently = 50;
                     if(saveFrame())
@@ -389,7 +400,10 @@ void VideoWork::doWork3()
                 {
                     if(flameRecently>-1)flameRecently--;
                     if(flameRecently==0)
+                    {
+                        StopCamera("192.168.100.102");
                         StartCamera("192.168.100.102");
+                    }
                 }
             }
 
