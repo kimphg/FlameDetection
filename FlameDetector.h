@@ -58,7 +58,7 @@ public:
     }
     const FeatureAnalyzer& getAnalyzer() const { return mAnalyzer; }
     const FlameDecider& getDecider() const { return mDecider; }
-    bool detect(const Mat& frame);
+    int detect(const Mat& frame);
 };
 
 #endif /* defined(__FlameDetection__FlameDetector__) */

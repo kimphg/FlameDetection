@@ -47,8 +47,23 @@ void VideoHandler::DeactivateAlarm()
     message[4]= 0x00;
     alarmSocket.writeDatagram((char*)&message[0],5, QHostAddress("192.168.100.255") , 8888);
 }
+void VideoHandler::onTimer()
+{
+//    printf("\ncommand start");
+//    //QNetworkRequest request(QUrl("http://service:12345678@"+ipadr+"/rcp.xml?command=0x09A5&type=P_OCTET&direction=WRITE&num=1&payload=0x800006011085000000"));
+//    //reply = qnam->get(request);
+//    QNetworkAccessManager qnam;
+//    QNetworkRequest rq(QUrl("http://service:12345678@192.168.100.101/rcp.xml?command=0x09A5&type=P_OCTET&direction=WRITE&num=1&payload=0x800006011085000000"));
+//    QNetworkReply* reply = qnam.get(rq);
+//    QEventLoop loop;
+//    connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+//    loop.exec();
+//    printf("\ncommand sent");
+//    flushall();
+}
 int VideoHandler::handle()
-{    
+{
+    //QTimer::singleShot(2000, this, SLOT(onTimer()));
    // TCPClient client;
     //client.start("127.0.0.1", 8888);
     mVideoChannel = 0;

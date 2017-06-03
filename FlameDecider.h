@@ -45,12 +45,12 @@ private:
     void train(const map<int, Target>& targets);
 #else
     bool svmPredict(const Feature& feature);
-    bool judge(map<int, Target>& targets);
+    int judge(map<int, Target>& targets);
 #endif
     
 public:
     FlameDecider();
-    bool decide(const Mat& frame, map<int, Target>& targets);
+    int decide(const Mat& frame, map<int, Target>& targets);
 };
 
 #endif /* defined(__FlameDetection__FlameDecider__) */

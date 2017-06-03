@@ -21,7 +21,7 @@ FlameDetector::FlameDetector()
 
 }
 
-bool FlameDetector::detect(const Mat& frame)
+int FlameDetector::detect(const Mat& frame)
 {
     mFrame = frame;
     
@@ -37,7 +37,7 @@ bool FlameDetector::detect(const Mat& frame)
     if (mTrack)
     {
         mAnalyzer.analyze(mFrame, mTargetMap);
-        bool result = mDecider.decide(mFrame, mTargetMap);
+        int result = mDecider.decide(mFrame, mTargetMap);
         finish = clock();
 
         if (result)

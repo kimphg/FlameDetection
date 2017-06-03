@@ -166,9 +166,9 @@ inline bool FlameDecider::svmPredict(const Feature& feature)
 	return result == 1.0;
 }
 
-bool FlameDecider::judge(map<int, Target>& targets)
+int FlameDecider::judge(map<int, Target>& targets)
 {
-    bool flameDetected = false;
+    int flameDetected = 0;
     
 //    Mat temp;
 //    mFrame.copyTo(temp);
@@ -183,6 +183,7 @@ bool FlameDecider::judge(map<int, Target>& targets)
         if(!it->second.isFlame)
         {
             it->second.isFlame = isFlame;
+            it->second.flameCount = 0;
 
         }
         if(isFlame)
@@ -191,24 +192,14 @@ bool FlameDecider::judge(map<int, Target>& targets)
         {
             if(it->second.flameCount)it->second.flameCount--;
         }
-        flameDetected = (it->second.flameCount>4);
+        if(flameDetected<it->second.flameCount)flameDetected = it->second.flameCount;
         if (flameDetected)
         {
-            it->second.feature.printValue();
 
             m_Rect = it->second.region.rect;
 
             ofstream ofs("detection.txt", ios::app);
             ofs << it->second.feature << false << endl;
-
-//            rectangle(temp, it->second.region.rect, Scalar(0, 255, 0));
-//            // save detected frame to jpg
-//            string fileName;
-//            getCurTime(fileName);
-//            fileName += ".jpg";
-//            cout << "Saving key frame to '" << fileName << "'." << endl;
-//            printf("times: %d\n",it->second.times);
-//            imwrite("C:\\FlameDetector\\" +fileName, temp);
 
         }
     }
@@ -222,7 +213,7 @@ bool FlameDecider::judge(map<int, Target>& targets)
 }
 #endif
 
-bool FlameDecider::decide(const Mat& frame, map<int, Target>& targets)
+int FlameDecider::decide(const Mat& frame, map<int, Target>& targets)
 {
     mFrame = frame;
     

@@ -17,7 +17,7 @@
 //#include "videowork1.h"
 #include "QSound"
 #include <QUdpSocket>
-class VideoHandler {
+class VideoHandler : public QObject{
 private:
     static const int WAIT_INTERVAL = 30;
     static const int MAX_EXTRA_FRAME_COUNT = 80;
@@ -67,6 +67,8 @@ public:
 
     void ActivateAlarm();
     void DeactivateAlarm();
+private slots:
+    void onTimer();
 };
 
 #endif /* defined(__FlameDetection__VideoHandler__) */

@@ -478,7 +478,7 @@ void Feature::printValue() const
 
 bool Feature::checkValid()
 {
-    if(diffInOut<60.0||frameDiffMean<6.0)return false;
+    if(diffInOut<70.0||frameDiffMean<6.0)return false;
     if(!circularityMean
             *squarenessMean
             *aspectRatioMean
