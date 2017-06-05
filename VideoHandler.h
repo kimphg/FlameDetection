@@ -17,7 +17,9 @@
 //#include "videowork1.h"
 #include "QSound"
 #include <QUdpSocket>
-class VideoHandler : public QObject{
+class VideoHandler : public QObject
+{
+    Q_OBJECT
 private:
     static const int WAIT_INTERVAL = 30;
     static const int MAX_EXTRA_FRAME_COUNT = 80;

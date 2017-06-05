@@ -16,6 +16,7 @@ extern VideoHandler* videoHandler;
 extern VideoWork *m_worker;
 extern VideoWork *m_worker2;
 extern VideoWork *m_worker3;
+extern CConfig mConfig;
 
 /**************** Feature ****************/
 
@@ -478,7 +479,7 @@ void Feature::printValue() const
 
 bool Feature::checkValid()
 {
-    if(diffInOut<70.0||frameDiffMean<6.0)return false;
+    if(diffInOut< mConfig._config.diffInOut||frameDiffMean<6.0)return false;
     if(!circularityMean
             *squarenessMean
             *aspectRatioMean

@@ -49,23 +49,30 @@ void VideoHandler::DeactivateAlarm()
 }
 void VideoHandler::onTimer()
 {
-//    printf("\ncommand start");
-//    //QNetworkRequest request(QUrl("http://service:12345678@"+ipadr+"/rcp.xml?command=0x09A5&type=P_OCTET&direction=WRITE&num=1&payload=0x800006011085000000"));
-//    //reply = qnam->get(request);
-//    QNetworkAccessManager qnam;
-//    QNetworkRequest rq(QUrl("http://service:12345678@192.168.100.101/rcp.xml?command=0x09A5&type=P_OCTET&direction=WRITE&num=1&payload=0x800006011085000000"));
-//    QNetworkReply* reply = qnam.get(rq);
-//    QEventLoop loop;
-//    connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
-//    loop.exec();
-//    printf("\ncommand sent");
-//    flushall();
+//    if (m_worker2)
+//    {
+//        m_worker2->m_IsFinished = true;
+//    }
+
+
+//    m_thread2 = new QThread();
+//    m_worker2 = new VideoWork();
+//    m_worker2->moveToThread(m_thread2);
+//    QObject::connect(m_worker2, SIGNAL(workRequested()), m_thread2, SLOT(start()));
+//    QObject::connect(m_thread2, SIGNAL(started()), m_worker2, SLOT(doWork2()));
+//    QObject::connect(m_worker2, SIGNAL(finished()), m_thread2, SLOT(quit()), Qt::DirectConnection);
+//    m_worker2->abort();
+//    m_thread2->wait();
+//    m_worker2->requestWork();
+
+    return;
 }
 int VideoHandler::handle()
 {
-    //QTimer::singleShot(2000, this, SLOT(onTimer()));
-   // TCPClient client;
-    //client.start("127.0.0.1", 8888);
+//    QTimer *timer = new QTimer(this);
+//    QObject::connect(timer, SIGNAL(timeout()), this, SLOT(onTimer()));
+//    timer->start(60000);
+
     mVideoChannel = 0;
     //alarmSocket = new QUdpSocket();
     bool continueToDetect = true;

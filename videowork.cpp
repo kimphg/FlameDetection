@@ -309,6 +309,7 @@ void VideoWork::doWork2()
     // ...
     // Set _working to false, meaning the process can't be aborted anymore.
     m_mutex.lock();
+    mCapture.release();
     m_working = false;
     m_IsFinished = true;
     m_mutex.unlock();

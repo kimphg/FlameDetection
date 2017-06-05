@@ -31,6 +31,7 @@ public:
     bool saveFrame();
     const FlameDetector& getDetector() const { return mDetector; }
 
+
 private:
     bool    m_abort;
     bool    m_working;

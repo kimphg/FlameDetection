@@ -47,6 +47,7 @@ void CConfig::LoadXmlFile()
     _config.cropX            = cvReadIntByName(fs, 0, "CropX", 50);
     _config.cropY            = cvReadIntByName(fs, 0, "CropY", 35);
     _config.alarmNumber      = cvReadIntByName(fs, 0, "AlarmNumber", 1);
+    _config.diffInOut        = cvReadIntByName(fs, 0, "DiffInOut", 60);
 
     cvReleaseFileStorage(&fs);
 }
@@ -69,6 +70,7 @@ void CConfig::setDefault()
     _config.cropX           = 50;
     _config.cropY           = 35;
     _config.alarmNumber     = 1;
+    _config.diffInOut       = 60;
     SaveXmlFile();
 }
 
@@ -93,6 +95,7 @@ void CConfig::SaveXmlFile()
     cvWriteInt(fs, "CropX", _config.cropX);
     cvWriteInt(fs, "CropY", _config.cropY);
     cvWriteInt(fs, "AlarmNumber", _config.alarmNumber);
+    cvWriteInt(fs, "DiffInOut", _config.diffInOut);
 
     cvReleaseFileStorage(&fs);
 }
