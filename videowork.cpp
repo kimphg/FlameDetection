@@ -181,7 +181,7 @@ void VideoWork::doWork()
 
             imshow("Camera-01", m_Frame);
 
-            waitKey(10);
+            if(waitKey(10)==32)resetProgram();
            // phan code duoc bao ve
         }catch(...)
         {
@@ -199,7 +199,10 @@ void VideoWork::doWork()
 
     emit finished();
 }
-
+void VideoWork::resetProgram()
+{
+    std::system("reset.bat");
+}
 void VideoWork::doWork2()
 {    
     std::string url = mConfig._config.strCamUrl2;
