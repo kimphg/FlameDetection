@@ -20,7 +20,9 @@ void VideoWork::StopCamera(QString ipadr)
 {
     //StartCamera(ipadr);
     printf("stop cam \n");
-
+#ifdef TEST_MODE
+    return;
+#endif
     QNetworkRequest request(QUrl("http://service:12345678@"+ipadr+"/rcp.xml?command=0x09A5&type=P_OCTET&direction=WRITE&num=1&payload=0x800006011085000000"));
     reply = qnam->get(request);
 
@@ -34,7 +36,9 @@ void VideoWork::StartCamera(QString ipadr)
 {
     //StopCamera(ipadr);
     printf("start cam \n");
-
+#ifdef TEST_MODE
+    return;
+#endif
     //qnam = new QNetworkAccessManager();
     reply = qnam->get(QNetworkRequest(QUrl("http://service:12345678@"
     +ipadr+"/rcp.xml?command=0x09A5&type=P_OCTET&direction=WRITE&num=1&payload=0x800006011085010000")));

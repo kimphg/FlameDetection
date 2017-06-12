@@ -31,7 +31,7 @@ using namespace cv;
 
 //#define OLD_ALGO
 //#define TRAIN_MODE
-
+//#define TEST_MODE
 //#define DEBUG_MODE
 #ifndef TRAIN_MODE
 #define MODE_MULTITHREAD
