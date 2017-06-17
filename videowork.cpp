@@ -304,7 +304,7 @@ void VideoWork::doWork2()
 
             imshow("Camera-02", m_Frame);
 
-            waitKey(10);
+            if(waitKey(10)==32)resetProgram();
            // phan code duoc bao ve
         }catch(...)
         {
@@ -417,7 +417,7 @@ void VideoWork::doWork3()
 
             imshow("Camera-03", m_Frame);
 
-            waitKey(10);
+            if(waitKey(10)==32)resetProgram();
            // phan code duoc bao ve
         }catch(...)
         {
