@@ -272,9 +272,7 @@ void VideoWork::doWork2()
             if (true)//xu ly 3 frame 1 lan
             {
                 m_mutex.lock();
-                videoHandler->mVideoChannel = 2;
-                m_mutex.unlock();
-                videoHandler->mVideoChannel = 1;
+                videoHandler->mVideoChannel = 2;                
                 m_mutex.unlock();
                 int res = mDetector.detect(mFrame);
                 if(res>6)videoHandler->ActivateAlarm();
@@ -388,7 +386,7 @@ void VideoWork::doWork3()
             if (true)//xu ly 3 frame 1 lan
             {
                 m_mutex.lock();
-                videoHandler->mVideoChannel = 1;
+                videoHandler->mVideoChannel = 3;
                 m_mutex.unlock();
                 int res = mDetector.detect(mFrame);
                 if(res>6)videoHandler->ActivateAlarm();
