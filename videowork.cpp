@@ -185,7 +185,15 @@ void VideoWork::doWork()
 
             imshow("Camera-01", m_Frame);
 
-            if(waitKey(10)==32)resetProgram();
+            int nKey = waitKey(10);
+            if (nKey == 32)
+                resetProgram();
+            else if (nKey == 27)
+                closeProgram();
+
+//            if(waitKey(10)==32)
+//                resetProgram();
+
            // phan code duoc bao ve
         }catch(...)
         {
@@ -207,6 +215,12 @@ void VideoWork::resetProgram()
 {
     std::system("reset.bat");
 }
+
+void VideoWork::closeProgram()
+{
+    std::system("closeApp.bat");
+}
+
 void VideoWork::doWork2()
 {    
     std::string url = mConfig._config.strCamUrl2;
@@ -302,7 +316,14 @@ void VideoWork::doWork2()
 
             imshow("Camera-02", m_Frame);
 
-            if(waitKey(10)==32)resetProgram();
+            int nKey = waitKey(10);
+            if (nKey == 32)
+                resetProgram();
+            else if (nKey == 27)
+                closeProgram();
+
+            //if(waitKey(10)==32)resetProgram();
+
            // phan code duoc bao ve
         }catch(...)
         {
@@ -415,7 +436,14 @@ void VideoWork::doWork3()
 
             imshow("Camera-03", m_Frame);
 
-            if(waitKey(10)==32)resetProgram();
+            int nKey = waitKey(10);
+            if (nKey == 32)
+                resetProgram();
+            else if (nKey == 27)
+                closeProgram();
+
+            //if(waitKey(10)==32)resetProgram();
+
            // phan code duoc bao ve
         }catch(...)
         {

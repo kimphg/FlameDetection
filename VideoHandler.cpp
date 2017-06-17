@@ -49,29 +49,13 @@ void VideoHandler::DeactivateAlarm()
 }
 void VideoHandler::onTimer()
 {
-//    if (m_worker2)
-//    {
-//        m_worker2->m_IsFinished = true;
-//    }
-
-
-//    m_thread2 = new QThread();
-//    m_worker2 = new VideoWork();
-//    m_worker2->moveToThread(m_thread2);
-//    QObject::connect(m_worker2, SIGNAL(workRequested()), m_thread2, SLOT(start()));
-//    QObject::connect(m_thread2, SIGNAL(started()), m_worker2, SLOT(doWork2()));
-//    QObject::connect(m_worker2, SIGNAL(finished()), m_thread2, SLOT(quit()), Qt::DirectConnection);
-//    m_worker2->abort();
-//    m_thread2->wait();
-//    m_worker2->requestWork();
-
-    return;
+    std::system("reset.bat");
 }
 int VideoHandler::handle()
 {
-//    QTimer *timer = new QTimer(this);
-//    QObject::connect(timer, SIGNAL(timeout()), this, SLOT(onTimer()));
-//    timer->start(60000);
+    QTimer *timer = new QTimer(this);
+    QObject::connect(timer, SIGNAL(timeout()), this, SLOT(onTimer()));
+    timer->start(600000);
 
     mVideoChannel = 0;
     //alarmSocket = new QUdpSocket();

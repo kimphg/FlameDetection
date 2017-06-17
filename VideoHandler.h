@@ -68,7 +68,7 @@ public:
     int handle();
 
     void ActivateAlarm();
-    void DeactivateAlarm();
+    void DeactivateAlarm();    
 private slots:
     void onTimer();
 };

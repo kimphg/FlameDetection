@@ -44,6 +44,7 @@ private:
     void StopCamera(QString ipadr);
     void StartCamera(QString ipadr);
     void resetProgram();
+    void closeProgram();
 signals:
     void workRequested();
     void finished();

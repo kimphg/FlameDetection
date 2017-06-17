@@ -5,7 +5,7 @@ QT += network
 CONFIG += c++11
 
 TARGET = FlameDetection
-CONFIG += console
+#CONFIG += console
 CONFIG -= app_bundle
 
 TEMPLATE = app
