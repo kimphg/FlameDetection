@@ -194,6 +194,7 @@ void TargetExtractor::threshDetect(int threshold)
 {
 
     int neightbouringDistance = 3;
+    int thresh2 = threshold - 20;
     //adaptiveThreshold(mFrame, mMask, 255, ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY, 21, 0);
     for (int i = 1; i < mFrame.rows; i++)
     {
@@ -226,6 +227,7 @@ void TargetExtractor::threshDetect(int threshold)
             if(mMask.at<uchar>(i, j)==0)
             {
                 int value = mFrame.at<uchar>(i,j);
+                if(value<thresh2)continue;
                 if(mMask.at<uchar>(i+1, j)==255)
                 {
                     if((mFrame.at<uchar>(i+1,j)-value) < neightbouringDistance) mMask.at<uchar>(i, j) = 255;
