@@ -425,6 +425,8 @@ void TargetExtractor::contoursAreaFilter(int smallThreshold, int largeThreshold,
         //loai bo cac rect o ria man hinh
         if (rect.x < (10))continue;
         if ((rect.x +rect.width )> (mMask.cols-10))continue;
+        if (rect.y < (10))continue;
+        if ((rect.y +rect.height )> (mMask.rows-10))continue;
         //loaji bo cac rect nam ngang
         if((((double)rect.width)/rect.height)>1.5)continue;
         indexes.push_back(i);
