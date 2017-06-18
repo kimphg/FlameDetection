@@ -48,6 +48,7 @@ void CConfig::LoadXmlFile()
     _config.cropY            = cvReadIntByName(fs, 0, "CropY", 35);
     _config.alarmNumber      = cvReadIntByName(fs, 0, "AlarmNumber", 1);
     _config.diffInOut        = cvReadIntByName(fs, 0, "DiffInOut", 60);
+    _config.alarmLevel        = cvReadIntByName(fs, 0, "AlarmLevel", 60);
 
     cvReleaseFileStorage(&fs);
 }
@@ -71,6 +72,7 @@ void CConfig::setDefault()
     _config.cropY           = 35;
     _config.alarmNumber     = 1;
     _config.diffInOut       = 60;
+    _config.alarmLevel      = 2;
     SaveXmlFile();
 }
 
@@ -81,8 +83,8 @@ void CConfig::SaveXmlFile()
     CvFileStorage* fs = cvOpenFileStorage(XML_FILE, 0, CV_STORAGE_WRITE);
 
     cvWriteString(fs, "CamUrl", _config.strCamUrl.data());
-    cvWriteString(fs, "CamUrl2", _config.strCamUrl.data());
-    cvWriteString(fs, "CamUrl3", _config.strCamUrl.data());
+    cvWriteString(fs, "CamUrl2", _config.strCamUrl2.data());
+    cvWriteString(fs, "CamUrl3", _config.strCamUrl3.data());
     cvWriteInt(fs, "FrmPosX", _config.frmPosX);
     cvWriteInt(fs, "FrmPosY", _config.frmPosY);
     cvWriteInt(fs, "FrmWidth", _config.frmWidth);
@@ -96,6 +98,7 @@ void CConfig::SaveXmlFile()
     cvWriteInt(fs, "CropY", _config.cropY);
     cvWriteInt(fs, "AlarmNumber", _config.alarmNumber);
     cvWriteInt(fs, "DiffInOut", _config.diffInOut);
+    cvWriteInt(fs, "AlarmLevel", _config.alarmLevel);
 
     cvReleaseFileStorage(&fs);
 }

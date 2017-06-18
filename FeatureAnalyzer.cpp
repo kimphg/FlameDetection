@@ -479,7 +479,11 @@ void Feature::printValue() const
 
 bool Feature::checkValid()
 {
-    if(diffInOut< mConfig._config.diffInOut||frameDiffMean<6.0)return false;
+    if(mConfig._config.alarmLevel>6)
+    {
+       if(diffInOut< 70||frameDiffMean<7.0)return false;
+    }
+    else if(diffInOut< mConfig._config.diffInOut||frameDiffMean<6.0)return false;
     if(!circularityMean
             *squarenessMean
             *aspectRatioMean
@@ -487,7 +491,7 @@ bool Feature::checkValid()
             *circularityVar
             *squarenessVar*aspectRatioVar*roughness*diffInOut*texture[0]*texture[1]*texture[2]*texture[3])
         return false;
-        return true;
+    return true;
 }
 
 Feature::operator Mat() const

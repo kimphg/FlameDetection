@@ -9,6 +9,7 @@
 
 extern CConfig mConfig;
 extern VideoHandler* videoHandler;
+//int frameCountMin = 2;
 
 VideoWork::VideoWork(QObject *parent) : QObject(parent)
 {
@@ -23,11 +24,8 @@ void VideoWork::StopCamera(QString ipadr)
 #ifdef TEST_MODE
     return;
 #endif
-    QNetworkRequest request(QUrl("http://service:12345678@"+ipadr+"/rcp.xml?command=0x09A5&type=P_OCTET&direction=WRITE&num=1&payload=0x800006011085000000"));
-    reply = qnam->get(request);
-
-    //QNetworkRequest rq(QUrl("http://service:12345678@192.168.100.101/rcp.xml?command=0x09A5&type=P_OCTET&direction=WRITE&num=1&payload=0x800006011085000000"));
-    //reply = qnam->get(rq);
+    reply = qnam->get(QNetworkRequest(QUrl("http://service:12345678@"
+    +ipadr+"/rcp.xml?command=0x09A5&type=P_OCTET&direction=WRITE&num=1&payload=0x800006011085000000")));
     QEventLoop loop;
     connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
     loop.exec();
@@ -42,8 +40,6 @@ void VideoWork::StartCamera(QString ipadr)
     //qnam = new QNetworkAccessManager();
     reply = qnam->get(QNetworkRequest(QUrl("http://service:12345678@"
     +ipadr+"/rcp.xml?command=0x09A5&type=P_OCTET&direction=WRITE&num=1&payload=0x800006011085010000")));
-    //QNetworkRequest rq(QUrl("http://service:12345678@192.168.100.101/rcp.xml?command=0x09A5&type=P_OCTET&direction=WRITE&num=1&payload=0x800006011085010000"));
-    //reply = qnam->get(rq);
     QEventLoop loop;
     connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
     loop.exec();
@@ -94,8 +90,8 @@ void VideoWork::doWork()
     //onTimer();
     VideoCapture mCapture(url);
     Mat mFrame;    
-    Rect mROI(mConfig._config.cropX, mConfig._config.cropY, mConfig._config.frmWidth - (2*mConfig._config.cropX),
-                 mConfig._config.frmHeight - (2*mConfig._config.cropY));
+    Rect mROI(mConfig._config.cropX, mConfig._config.cropY, 600 - (2*mConfig._config.cropX),
+                 500 - (2*mConfig._config.cropY));
     m_IsFinished = false;
 
     if (!mCapture.isOpened())
@@ -113,6 +109,8 @@ void VideoWork::doWork()
     }    
 
     qDebug()<<"Connected to Camera - 01...";
+    namedWindow("Camera-01");
+    moveWindow("Camera-01",0,0);
     int flameRecently = 1;
     while(true)
     {
@@ -143,7 +141,8 @@ void VideoWork::doWork()
                 break;
             }
 
-            resize(mFrame, mFrame, cvSize(mConfig._config.frmWidth, mConfig._config.frmHeight));
+
+            resize(mFrame, mFrame, cvSize(600, 500));
             mFrame.copyTo(m_Frame);
 
 #ifdef MODE_GRAYSCALE
@@ -157,13 +156,13 @@ void VideoWork::doWork()
                 videoHandler->mVideoChannel = 1;
                 m_mutex.unlock();
                 int res = mDetector.detect(mFrame);
-                if(res>6)videoHandler->ActivateAlarm();
-                if (res>4)
+                if(res>mConfig._config.alarmLevel)videoHandler->ActivateAlarm();
+                if (res>1)
                 {
                     StartCamera("192.168.100.100");
                     StopCamera("192.168.100.100");
 
-                    flameRecently = 20;
+                    flameRecently = 3000;
                     if(saveFrame())
                     {                        
                         videoHandler->ActivateAlarm();
@@ -181,12 +180,30 @@ void VideoWork::doWork()
                     }
                 }
 
-            }            
-
+            }
+            for (map<int, Target>::iterator it = mDetector.mTargetMap.begin(); it != mDetector.mTargetMap.end(); it++) {
+                cv::Rect rect = it->second.region.rect;
+                rect.x+=mROI.x;
+                rect.y+=mROI.y;
+                rectangle(m_Frame, rect, Scalar(255, 255, 0));
+            }
+            cv::putText(m_Frame,(QString::fromUtf8("Alarm level: ")+QString::number(mConfig._config.alarmLevel)).toStdString(),
+                        cvPoint(250, 20), CV_FONT_HERSHEY_SIMPLEX, 0.5, cvScalar(255, 255, 0));
+            resize(m_Frame, m_Frame, cvSize(mConfig._config.frmWidth, mConfig._config.frmHeight));
             imshow("Camera-01", m_Frame);
-
+#ifdef TEST_MODE
+            int nKey = waitKey(40);
+#else
             int nKey = waitKey(10);
-            if (nKey == 32)
+#endif
+
+            if ((nKey >= 49) && (nKey < 58))
+            {
+                mConfig._config.alarmLevel = (nKey - 48);
+                mConfig.SaveXmlFile();
+            }
+
+            else if (nKey == 32)
                 resetProgram();
             else if (nKey == 27)
                 closeProgram();
@@ -227,8 +244,8 @@ void VideoWork::doWork2()
     VideoCapture mCapture(url);
 
     Mat mFrame;
-    Rect mROI(mConfig._config.cropX, mConfig._config.cropY, mConfig._config.frmWidth - (2*mConfig._config.cropX),
-                 mConfig._config.frmHeight - (2*mConfig._config.cropY));
+    Rect mROI(mConfig._config.cropX, mConfig._config.cropY, 600 - (2*mConfig._config.cropX),
+                 500 - (2*mConfig._config.cropY));
     m_IsFinished = false;
 
     if (!mCapture.isOpened())
@@ -246,6 +263,8 @@ void VideoWork::doWork2()
     }
 
     qDebug()<<"Connected to Camera - 02...";
+    namedWindow("Camera-02");
+    moveWindow("Camera-02",mConfig._config.frmWidth,0);
     int flameRecently=1;
     while(true)
     {
@@ -275,7 +294,7 @@ void VideoWork::doWork2()
                 emit finished();
                 break;
             }
-            resize(mFrame, mFrame, cvSize(mConfig._config.frmWidth, mConfig._config.frmHeight));
+            resize(mFrame, mFrame, cvSize(600, 500));
             mFrame.copyTo(m_Frame);
 
 #ifdef MODE_GRAYSCALE
@@ -289,12 +308,12 @@ void VideoWork::doWork2()
                 videoHandler->mVideoChannel = 2;                
                 m_mutex.unlock();
                 int res = mDetector.detect(mFrame);
-                if(res>6)videoHandler->ActivateAlarm();
-                if (res>4)
+                if(res>mConfig._config.alarmLevel)videoHandler->ActivateAlarm();
+                if (res>1)
                 {
                     StartCamera("192.168.100.101");
                     StopCamera("192.168.100.101");
-                    flameRecently = 20;
+                    flameRecently = 3000;
                     if(saveFrame())
                     {
                         videoHandler->ActivateAlarm();
@@ -313,11 +332,29 @@ void VideoWork::doWork2()
                     }
                 }
             }
-
+            for (map<int, Target>::iterator it = mDetector.mTargetMap.begin(); it != mDetector.mTargetMap.end(); it++) {
+                cv::Rect rect = it->second.region.rect;
+                rect.x+=mROI.x;
+                rect.y+=mROI.y;
+                rectangle(m_Frame, rect, Scalar(255, 255, 0));
+            }
+            cv::putText(m_Frame,(QString::fromUtf8("Alarm level: ")+QString::number(mConfig._config.alarmLevel)).toStdString(),
+                        cvPoint(250, 20), CV_FONT_HERSHEY_SIMPLEX, 0.5, cvScalar(255, 255, 0));
+            resize(m_Frame, m_Frame, cvSize(mConfig._config.frmWidth, mConfig._config.frmHeight));
             imshow("Camera-02", m_Frame);
 
+#ifdef TEST_MODE
+            int nKey = waitKey(40);
+#else
             int nKey = waitKey(10);
-            if (nKey == 32)
+#endif
+            if ((nKey >= 49) && (nKey < 58))
+            {
+                mConfig._config.alarmLevel = (nKey - 48);
+                mConfig.SaveXmlFile();
+            }
+
+            else if (nKey == 32)
                 resetProgram();
             else if (nKey == 27)
                 closeProgram();
@@ -349,8 +386,8 @@ void VideoWork::doWork3()
     VideoCapture mCapture(url);
 
     Mat mFrame;
-    Rect mROI(mConfig._config.cropX, mConfig._config.cropY, mConfig._config.frmWidth - (2*mConfig._config.cropX),
-                 mConfig._config.frmHeight - (2*mConfig._config.cropY));
+    Rect mROI(mConfig._config.cropX, mConfig._config.cropY, 600 - (2*mConfig._config.cropX),
+                 500 - (2*mConfig._config.cropY));
     m_IsFinished = false;
 
     if (!mCapture.isOpened())
@@ -368,6 +405,8 @@ void VideoWork::doWork3()
     }
 
     qDebug()<<"Connected to Camera - 03...";
+    namedWindow("Camera-03");
+    moveWindow("Camera-03",mConfig._config.frmWidth*2,0);
     int flameRecently = 1;
     while(true)
     {
@@ -397,7 +436,7 @@ void VideoWork::doWork3()
                 emit finished();
                 break;
             }
-            resize(mFrame, mFrame, cvSize(mConfig._config.frmWidth, mConfig._config.frmHeight));
+            resize(mFrame, mFrame, cvSize(600, 500));
             mFrame.copyTo(m_Frame);
 
 #ifdef MODE_GRAYSCALE
@@ -410,12 +449,12 @@ void VideoWork::doWork3()
                 videoHandler->mVideoChannel = 3;
                 m_mutex.unlock();
                 int res = mDetector.detect(mFrame);
-                if(res>6)videoHandler->ActivateAlarm();
-                if (res>4)
+                if(res>mConfig._config.alarmLevel)videoHandler->ActivateAlarm();
+                if (res>1)
                 {
                     StartCamera("192.168.100.102");
                     StopCamera("192.168.100.102");
-                    flameRecently = 50;
+                    flameRecently = 3000;
                     if(saveFrame())
                     {
                         videoHandler->ActivateAlarm();
@@ -433,11 +472,28 @@ void VideoWork::doWork3()
                     }
                 }
             }
-
+            for (map<int, Target>::iterator it = mDetector.mTargetMap.begin(); it != mDetector.mTargetMap.end(); it++) {
+                cv::Rect rect = it->second.region.rect;
+                rect.x+=mROI.x;
+                rect.y+=mROI.y;
+                rectangle(m_Frame, rect, Scalar(255, 255, 0));
+            }
+            cv::putText(m_Frame,(QString::fromUtf8("Alarm level: ")+QString::number(mConfig._config.alarmLevel)).toStdString(),
+                        cvPoint(250, 20), CV_FONT_HERSHEY_SIMPLEX, 0.5, cvScalar(255, 255, 0));
+            resize(m_Frame, m_Frame, cvSize(mConfig._config.frmWidth, mConfig._config.frmHeight));
             imshow("Camera-03", m_Frame);
 
+#ifdef TEST_MODE
+            int nKey = waitKey(40);
+#else
             int nKey = waitKey(10);
-            if (nKey == 32)
+#endif
+            if ((nKey >= 49) && (nKey < 58))
+            {
+                mConfig._config.alarmLevel = (nKey - 48);
+                mConfig.SaveXmlFile();
+            }
+            else if (nKey == 32)
                 resetProgram();
             else if (nKey == 27)
                 closeProgram();

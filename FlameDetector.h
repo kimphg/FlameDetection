@@ -36,6 +36,7 @@ struct Target {
 class FlameDetector {
 public:
     Rect m_Rect;
+    map<int, Target> mTargetMap;
 private:
     static const int SKIP_FRAME_COUNT = 20;
     
@@ -43,7 +44,7 @@ private:
     TargetExtractor mExtractor;
     FeatureAnalyzer mAnalyzer;
     FlameDecider mDecider;
-    map<int, Target> mTargetMap;
+
     int mFrameCount;
     int mFlameCount;
     bool mTrack;

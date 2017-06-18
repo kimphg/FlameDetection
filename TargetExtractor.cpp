@@ -193,11 +193,11 @@ void TargetExtractor::movementDetect(double learningRate)
 void TargetExtractor::threshDetect(int threshold)
 {
 
-    int neightbouringDistance = 5;
+    int neightbouringDistance = 3;
     //adaptiveThreshold(mFrame, mMask, 255, ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY, 21, 0);
-    for (uint i = 1; i < mFrame.rows; i++)
+    for (int i = 1; i < mFrame.rows; i++)
     {
-        for (uint j = 1; j < mFrame.cols; j++)
+        for (int j = 1; j < mFrame.cols; j++)
         {
             int value = mFrame.at<uchar>(i,j);
             if((value>threshold))
@@ -237,6 +237,7 @@ void TargetExtractor::threshDetect(int threshold)
             }
         }
     }
+    //imshow("mask",mMask);
 
 }
 void TargetExtractor::cotrastDetect(double mag)
@@ -420,10 +421,10 @@ void TargetExtractor::contoursAreaFilter(int smallThreshold, int largeThreshold,
 
         Rect rect = boundingRect(Mat(contours[i]));
         //loai bo cac rect o ria man hinh
-        if (rect.x < (50))continue;
-        if ((rect.x +rect.width )> (mMask.cols-50))continue;
+        if (rect.x < (10))continue;
+        if ((rect.x +rect.width )> (mMask.cols-10))continue;
         //loaji bo cac rect nam ngang
-        if((double)rect.width/rect.height>1.0)continue;
+        if((((double)rect.width)/rect.height)>1.5)continue;
         indexes.push_back(i);
         areas.push_back(area);
         boundRects.push_back(rect);
@@ -451,7 +452,7 @@ void TargetExtractor::contoursAreaFilter(int smallThreshold, int largeThreshold,
         mContours[size].contour.swap(contours[index]);
         mContours[size].area = areas[offset];
         mContours[size].boundRect = boundRects[offset];
-
+        //rectangle(mFrame, mContours[size].boundRect, Scalar(0, 255, 255));
         *it = 0;
         keep--;
     }
