@@ -194,7 +194,7 @@ void TargetExtractor::threshDetect(int threshold)
 {
 
     int neightbouringDistance = 3;
-    int thresh2 = threshold - 20;
+    int thresh2 = threshold - mConfig._config.threshDetect;
     //adaptiveThreshold(mFrame, mMask, 255, ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY, 21, 0);
     for (int i = 1; i < mFrame.rows; i++)
     {

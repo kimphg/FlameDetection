@@ -48,7 +48,8 @@ void CConfig::LoadXmlFile()
     _config.cropY            = cvReadIntByName(fs, 0, "CropY", 35);
     _config.alarmNumber      = cvReadIntByName(fs, 0, "AlarmNumber", 1);
     _config.diffInOut        = cvReadIntByName(fs, 0, "DiffInOut", 60);
-    _config.alarmLevel        = cvReadIntByName(fs, 0, "AlarmLevel", 60);
+    _config.alarmLevel       = cvReadIntByName(fs, 0, "AlarmLevel", 2);
+    _config.threshDetect     = cvReadIntByName(fs, 0, "ThreshDetect", 20);
 
     cvReleaseFileStorage(&fs);
 }
@@ -73,6 +74,7 @@ void CConfig::setDefault()
     _config.alarmNumber     = 1;
     _config.diffInOut       = 60;
     _config.alarmLevel      = 2;
+    _config.threshDetect    = 20;
     SaveXmlFile();
 }
 
@@ -99,6 +101,7 @@ void CConfig::SaveXmlFile()
     cvWriteInt(fs, "AlarmNumber", _config.alarmNumber);
     cvWriteInt(fs, "DiffInOut", _config.diffInOut);
     cvWriteInt(fs, "AlarmLevel", _config.alarmLevel);
+    cvWriteInt(fs, "ThreshDetect", _config.threshDetect);
 
     cvReleaseFileStorage(&fs);
 }
