@@ -31,7 +31,7 @@ public:
     bool saveFrame();
     const FlameDetector& getDetector() const { return mDetector; }
 
-
+    void setTilt(QString ipadr, int angle);
 private:
     bool    m_abort;
     bool    m_working;
@@ -45,6 +45,7 @@ private:
     void StartCamera(QString ipadr);
     void resetProgram();
     void closeProgram();
+
 signals:
     void workRequested();
     void finished();

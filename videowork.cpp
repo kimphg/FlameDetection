@@ -44,6 +44,33 @@ void VideoWork::StartCamera(QString ipadr)
     connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
     loop.exec();
 }
+void VideoWork::setTilt(QString ipadr,int angle)
+{
+    switch(angle)
+    {
+    case 0:
+        reply = qnam->get(QNetworkRequest(QUrl("http://service:12345678@"
+        +ipadr+"/rcp.xml?command=0x09A5&type=P_OCTET&direction=WRITE&num=1&payload=0x8100060113037700")));
+        break;
+    case 1:
+        reply = qnam->get(QNetworkRequest(QUrl("http://service:12345678@"
+        +ipadr+"/rcp.xml?command=0x09A5&type=P_OCTET&direction=WRITE&num=1&payload=0x8100060113037300")));
+        break;
+    case 2:
+        reply = qnam->get(QNetworkRequest(QUrl("http://service:12345678@"
+        +ipadr+"/rcp.xml?command=0x09A5&type=P_OCTET&direction=WRITE&num=1&payload=0x8100060113036f00")));
+        break;
+    default:
+        break;
+
+    }
+    QEventLoop loop;
+    connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+    loop.exec();
+//http://160.10.39.80/rcp.xml?command=0x09A5&type=P_OCTET&direction=WRITE&num=1&payload=0x8100060113037600
+
+}
+
 void VideoWork::requestWork()
 {
     m_mutex.lock();
@@ -251,7 +278,6 @@ void VideoWork::doWork2()
     if (!mCapture.isOpened())
     {
         mCapture.release();
-
         cout << "Capture video fail!" << endl;
         // Set _working to false, meaning the process can't be aborted anymore.
         m_mutex.lock();
@@ -272,14 +298,11 @@ void VideoWork::doWork2()
         m_mutex.lock();
         bool abort = m_abort;
         m_mutex.unlock();
-
-
         if (abort)
         {
             qDebug()<<"Request worker aborting in Thread "<<thread()->currentThreadId();
             break;
         }
-
         try
         {
 

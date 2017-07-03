@@ -47,15 +47,27 @@ void VideoHandler::DeactivateAlarm()
     message[4]= 0x00;
     alarmSocket.writeDatagram((char*)&message[0],5, QHostAddress("192.168.100.255") , 8888);
 }
+int angle = 0;
 void VideoHandler::onTimer()
 {
-    std::system("reset.bat");
+    if(angle <3)
+    {
+        m_worker->setTilt("192.168.100.100",angle);
+        m_worker->setTilt("192.168.100.101",angle);
+        m_worker->setTilt("192.168.100.102",angle);
+    }
+    else
+    {
+       std::system("reset.bat");
+    }
+    angle++;
+
 }
 int VideoHandler::handle()
 {
     QTimer *timer = new QTimer(this);
     QObject::connect(timer, SIGNAL(timeout()), this, SLOT(onTimer()));
-    timer->start(600000);
+    timer->start(200000);
 
     mVideoChannel = 0;
     //alarmSocket = new QUdpSocket();
@@ -102,7 +114,7 @@ int VideoHandler::handle()
     m_worker3->abort();
     m_thread3->wait();
     m_worker3->requestWork();
-
+    onTimer();
     return 3;
 #endif
 
