@@ -46,6 +46,10 @@ private:
     void resetProgram();
     void closeProgram();
 
+    void moveUp(QString ipadr);
+    void moveDown(QString ipadr);
+    void moveLeft(QString ipadr);
+    void moveRight(QString ipadr);
 signals:
     void workRequested();
     void finished();

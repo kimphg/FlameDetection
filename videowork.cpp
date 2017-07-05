@@ -112,164 +112,12 @@ void VideoWork::onTimer()
 }
 void VideoWork::doWork()
 {
+
     std::string url = mConfig._config.strCamUrl;
+    QString ipadr = "192.168.100.100";
+    std::string winName = "Camera-01";
 
-    //onTimer();
     VideoCapture mCapture(url);
-    Mat mFrame;    
-    Rect mROI(mConfig._config.cropX, mConfig._config.cropY, 600 - (2*mConfig._config.cropX),
-                 500 - (2*mConfig._config.cropY));
-    m_IsFinished = false;
-
-    if (!mCapture.isOpened())
-    {
-        mCapture.release();
-
-        cout << "Capture video fail!" << endl;
-        // Set _working to false, meaning the process can't be aborted anymore.
-        m_mutex.lock();
-        m_working = false;
-        m_IsFinished = true;
-        m_mutex.unlock();
-
-        emit finished();
-    }    
-
-    qDebug()<<"Connected to Camera - 01...";
-    namedWindow("Camera-01");
-    moveWindow("Camera-01",0,0);
-    int flameRecently = 1;
-    while(true)
-    {
-        // Checks if the process should be aborted
-
-        m_mutex.lock();
-        bool abort = m_abort;
-        m_mutex.unlock();
-
-        if (abort)
-        {
-            qDebug()<<"Request worker aborting in Thread "<<thread()->currentThreadId();
-            break;
-        }
-
-        try
-        {
-
-            if(!mCapture.read(mFrame))
-            {
-                m_mutex.lock();
-                cout << "Read frame fail!" << endl;
-                m_IsFinished = true;
-                mCapture.release();
-                m_working = false;
-                m_mutex.unlock();
-                emit finished();
-                break;
-            }
-
-
-            resize(mFrame, mFrame, cvSize(600, 500));
-            mFrame.copyTo(m_Frame);
-
-#ifdef MODE_GRAYSCALE
-            cv::cvtColor(mFrame,mFrame, CV_BGRA2GRAY);
-#endif
-            mFrame = mFrame(mROI);
-
-            if (true)//xu ly 3 frame 1 lan
-            {
-                m_mutex.lock();
-                videoHandler->mVideoChannel = 1;
-                m_mutex.unlock();
-                int res = mDetector.detect(mFrame);
-                if(res>mConfig._config.alarmLevel)videoHandler->ActivateAlarm();
-                if (res>1)
-                {
-                    StartCamera("192.168.100.100");
-                    StopCamera("192.168.100.100");
-
-                    flameRecently = 3000;
-                    if(saveFrame())
-                    {                        
-                        videoHandler->ActivateAlarm();
-                        cout << "Flame detected." << endl;
-                    }
-
-                }
-                else
-                {
-                    if(flameRecently>-1)flameRecently--;
-                    if(flameRecently==0)
-                    {
-                        StopCamera("192.168.100.100");
-                        StartCamera("192.168.100.100");
-                    }
-                }
-
-            }
-            for (map<int, Target>::iterator it = mDetector.mTargetMap.begin(); it != mDetector.mTargetMap.end(); it++) {
-                cv::Rect rect = it->second.region.rect;
-                rect.x+=mROI.x;
-                rect.y+=mROI.y;
-                rectangle(m_Frame, rect, Scalar(255, 255, 0));
-            }
-            cv::putText(m_Frame,(QString::fromUtf8("Alarm level: ")+QString::number(mConfig._config.alarmLevel)).toStdString(),
-                        cvPoint(250, 20), CV_FONT_HERSHEY_SIMPLEX, 0.5, cvScalar(255, 255, 0));
-            resize(m_Frame, m_Frame, cvSize(mConfig._config.frmWidth, mConfig._config.frmHeight));
-            imshow("Camera-01", m_Frame);
-#ifdef TEST_MODE
-            int nKey = waitKey(40);
-#else
-            int nKey = waitKey(10);
-#endif
-
-            if ((nKey >= 49) && (nKey < 58))
-            {
-                mConfig._config.alarmLevel = (nKey - 48);
-                mConfig.SaveXmlFile();
-            }
-
-            else if (nKey == 32)
-                resetProgram();
-            else if (nKey == 27)
-                closeProgram();
-
-//            if(waitKey(10)==32)
-//                resetProgram();
-
-           // phan code duoc bao ve
-        }catch(...)
-        {
-            continue;            
-          // phan code de xu ly bat ky kieu ngoai le nao
-        }
-
-    }
-    // ...
-    // Set _working to false, meaning the process can't be aborted anymore.
-    m_mutex.lock();
-    m_working = false;
-    m_IsFinished = true;
-    m_mutex.unlock();
-
-    emit finished();
-}
-void VideoWork::resetProgram()
-{
-    std::system("reset.bat");
-}
-
-void VideoWork::closeProgram()
-{
-    std::system("closeApp.bat");
-}
-
-void VideoWork::doWork2()
-{    
-    std::string url = mConfig._config.strCamUrl2;
-    VideoCapture mCapture(url);
-
     Mat mFrame;
     Rect mROI(mConfig._config.cropX, mConfig._config.cropY, 600 - (2*mConfig._config.cropX),
                  500 - (2*mConfig._config.cropY));
@@ -288,10 +136,183 @@ void VideoWork::doWork2()
         emit finished();
     }
 
-    qDebug()<<"Connected to Camera - 02...";
-    namedWindow("Camera-02");
-    moveWindow("Camera-02",mConfig._config.frmWidth,0);
+    //qDebug()<<"Connected to Camera - 02...";
+    namedWindow(winName);
+    moveWindow(winName,mConfig._config.frmWidth,0);
     int flameRecently=1;
+    bool isMoving = false;
+    while(true)
+    {
+        // Checks if the process should be aborted
+        m_mutex.lock();
+        bool abort = m_abort;
+        m_mutex.unlock();
+        if (abort)
+        {
+            qDebug()<<"Request worker aborting in Thread "<<thread()->currentThreadId();
+            break;
+        }
+        try
+        {
+
+            if(!mCapture.read(mFrame))
+            {
+                m_mutex.lock();
+                cout << "Read frame fail!" << endl;
+                m_IsFinished = true;
+                mCapture.release();
+                m_working = false;
+                m_mutex.unlock();
+                emit finished();
+                break;
+            }
+            resize(mFrame, mFrame, cvSize(600, 500));
+            mFrame.copyTo(m_Frame);
+
+#ifdef MODE_GRAYSCALE
+            cv::cvtColor(mFrame,mFrame, CV_BGRA2GRAY);
+#endif
+            mFrame = mFrame(mROI);
+
+            if (true)//xu ly 3 frame 1 lan
+            {
+                m_mutex.lock();
+                videoHandler->mVideoChannel = 2;
+                m_mutex.unlock();
+                int res = mDetector.detect(mFrame);
+                if(res>mConfig._config.alarmLevel)videoHandler->ActivateAlarm();
+                if (res>1)
+                {
+                    StartCamera(ipadr);
+                    StopCamera(ipadr);
+                    flameRecently = 3000;
+                    if(saveFrame())
+                    {
+                        videoHandler->ActivateAlarm();
+                        cout << "Flame detected." << endl;
+                    }
+
+                }
+                else
+                {
+                    if(flameRecently>-1)flameRecently--;
+                    if(flameRecently==0)
+
+                    {
+                        StopCamera(ipadr);
+                        StartCamera(ipadr);
+                    }
+                }
+            }
+            for (map<int, Target>::iterator it = mDetector.mTargetMap.begin(); it != mDetector.mTargetMap.end(); it++) {
+                cv::Rect rect = it->second.region.rect;
+                rect.x+=mROI.x;
+                rect.y+=mROI.y;
+                rectangle(m_Frame, rect, Scalar(255, 255, 0));
+            }
+            cv::putText(m_Frame,(QString::fromUtf8("Alarm level: ")+QString::number(mConfig._config.alarmLevel)).toStdString(),
+                        cvPoint(250, 20), CV_FONT_HERSHEY_SIMPLEX, 0.5, cvScalar(255, 255, 0));
+            resize(m_Frame, m_Frame, cvSize(mConfig._config.frmWidth, mConfig._config.frmHeight));
+            imshow(winName, m_Frame);
+
+#ifdef TEST_MODE
+            int nKey = waitKey(40);
+#else
+            int nKey = waitKey(10);
+#endif
+            if ((nKey >= 49) && (nKey < 58))
+            {
+                mConfig._config.alarmLevel = (nKey - 48);
+                mConfig.SaveXmlFile();
+            }
+
+            else if (nKey == 32)
+                resetProgram();
+            else if (nKey == 27)
+                closeProgram();
+            else if (nKey =='w')
+            {
+                moveUp(ipadr);
+                isMoving = true;
+            }
+            else if (nKey =='s')
+            {
+                moveDown(ipadr);
+                isMoving = true;
+            }
+            else if (nKey =='a')
+            {
+                moveLeft(ipadr);
+                isMoving = true;
+            }
+            else if (nKey =='d')
+            {
+                moveRight(ipadr);
+                isMoving = true;
+            }
+            else if (isMoving)
+            {
+                StopCamera(ipadr);
+                isMoving = false;
+            }
+
+           // phan code duoc bao ve
+        }catch(...)
+        {
+            continue;
+          // phan code de xu ly bat ky kieu ngoai le nao
+        }
+
+    }
+    // ...
+    // Set _working to false, meaning the process can't be aborted anymore.
+    m_mutex.lock();
+    mCapture.release();
+    m_working = false;
+    m_IsFinished = true;
+    m_mutex.unlock();
+    emit finished();
+}
+void VideoWork::resetProgram()
+{
+    std::system("reset.bat");
+}
+
+void VideoWork::closeProgram()
+{
+    std::system("closeApp.bat");
+}
+
+void VideoWork::doWork2()
+{    
+    std::string url = mConfig._config.strCamUrl2;
+    QString ipadr = "192.168.100.101";
+    std::string winName = "Camera-02";
+
+    VideoCapture mCapture(url);
+    Mat mFrame;
+    Rect mROI(mConfig._config.cropX, mConfig._config.cropY, 600 - (2*mConfig._config.cropX),
+                 500 - (2*mConfig._config.cropY));
+    m_IsFinished = false;
+
+    if (!mCapture.isOpened())
+    {
+        mCapture.release();
+        cout << "Capture video fail!" << endl;
+        // Set _working to false, meaning the process can't be aborted anymore.
+        m_mutex.lock();
+        m_working = false;
+        m_IsFinished = true;
+        m_mutex.unlock();
+
+        emit finished();
+    }
+
+    //qDebug()<<"Connected to Camera - 02...";
+    namedWindow(winName);
+    moveWindow(winName,mConfig._config.frmWidth,0);
+    int flameRecently=1;
+    bool isMoving = false;
     while(true)
     {
         // Checks if the process should be aborted
@@ -334,8 +355,8 @@ void VideoWork::doWork2()
                 if(res>mConfig._config.alarmLevel)videoHandler->ActivateAlarm();
                 if (res>1)
                 {
-                    StartCamera("192.168.100.101");
-                    StopCamera("192.168.100.101");
+                    StartCamera(ipadr);
+                    StopCamera(ipadr);
                     flameRecently = 3000;
                     if(saveFrame())
                     {
@@ -350,8 +371,8 @@ void VideoWork::doWork2()
                     if(flameRecently==0)
 
                     {
-                        StopCamera("192.168.100.101");
-                        StartCamera("192.168.100.101");
+                        StopCamera(ipadr);
+                        StartCamera(ipadr);
                     }
                 }
             }
@@ -364,7 +385,7 @@ void VideoWork::doWork2()
             cv::putText(m_Frame,(QString::fromUtf8("Alarm level: ")+QString::number(mConfig._config.alarmLevel)).toStdString(),
                         cvPoint(250, 20), CV_FONT_HERSHEY_SIMPLEX, 0.5, cvScalar(255, 255, 0));
             resize(m_Frame, m_Frame, cvSize(mConfig._config.frmWidth, mConfig._config.frmHeight));
-            imshow("Camera-02", m_Frame);
+            imshow(winName, m_Frame);
 
 #ifdef TEST_MODE
             int nKey = waitKey(40);
@@ -381,8 +402,31 @@ void VideoWork::doWork2()
                 resetProgram();
             else if (nKey == 27)
                 closeProgram();
-
-            //if(waitKey(10)==32)resetProgram();
+            else if (nKey =='w')
+            {
+                moveUp(ipadr);
+                isMoving = true;
+            }
+            else if (nKey =='s')
+            {
+                moveDown(ipadr);
+                isMoving = true;
+            }
+            else if (nKey =='a')
+            {
+                moveLeft(ipadr);
+                isMoving = true;
+            }
+            else if (nKey =='d')
+            {
+                moveRight(ipadr);
+                isMoving = true;
+            }
+            else if (isMoving)
+            {
+                StopCamera(ipadr);
+                isMoving = false;
+            }
 
            // phan code duoc bao ve
         }catch(...)
@@ -399,15 +443,63 @@ void VideoWork::doWork2()
     m_working = false;
     m_IsFinished = true;
     m_mutex.unlock();
-
     emit finished();
 }
-
+void VideoWork::moveUp(QString ipadr)
+{
+#ifdef TEST_MODE
+    return;
+#endif
+    //qnam = new QNetworkAccessManager();
+    reply = qnam->get(QNetworkRequest(QUrl("http://service:12345678@"
+    +ipadr+"/rcp.xml?command=0x09A5&type=P_OCTET&direction=WRITE&num=1&payload=0x800006011085008200")));
+    QEventLoop loop;
+    connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+    loop.exec();
+}
+void VideoWork::moveDown(QString ipadr)
+{
+#ifdef TEST_MODE
+    return;
+#endif
+    //qnam = new QNetworkAccessManager();
+    reply = qnam->get(QNetworkRequest(QUrl("http://service:12345678@"
+    +ipadr+"/rcp.xml?command=0x09A5&type=P_OCTET&direction=WRITE&num=1&payload=0x800006011085000200")));
+    QEventLoop loop;
+    connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+    loop.exec();
+}
+void VideoWork::moveLeft(QString ipadr)
+{
+#ifdef TEST_MODE
+    return;
+#endif
+    //qnam = new QNetworkAccessManager();
+    reply = qnam->get(QNetworkRequest(QUrl("http://service:12345678@"
+    +ipadr+"/rcp.xml?command=0x09A5&type=P_OCTET&direction=WRITE&num=1&payload=0x800006011085020000")));
+    QEventLoop loop;
+    connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+    loop.exec();
+}
+void VideoWork::moveRight(QString ipadr)
+{
+#ifdef TEST_MODE
+    return;
+#endif
+    //qnam = new QNetworkAccessManager();
+    reply = qnam->get(QNetworkRequest(QUrl("http://service:12345678@"
+    +ipadr+"/rcp.xml?command=0x09A5&type=P_OCTET&direction=WRITE&num=1&payload=0x800006011085820000")));
+    QEventLoop loop;
+    connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+    loop.exec();
+}
 void VideoWork::doWork3()
 {
     std::string url = mConfig._config.strCamUrl3;
-    VideoCapture mCapture(url);
+    QString ipadr = "192.168.100.102";
+    std::string winName = "Camera-03";
 
+    VideoCapture mCapture(url);
     Mat mFrame;
     Rect mROI(mConfig._config.cropX, mConfig._config.cropY, 600 - (2*mConfig._config.cropX),
                  500 - (2*mConfig._config.cropY));
@@ -416,7 +508,6 @@ void VideoWork::doWork3()
     if (!mCapture.isOpened())
     {
         mCapture.release();
-
         cout << "Capture video fail!" << endl;
         // Set _working to false, meaning the process can't be aborted anymore.
         m_mutex.lock();
@@ -427,24 +518,22 @@ void VideoWork::doWork3()
         emit finished();
     }
 
-    qDebug()<<"Connected to Camera - 03...";
-    namedWindow("Camera-03");
-    moveWindow("Camera-03",mConfig._config.frmWidth*2,0);
-    int flameRecently = 1;
+    //qDebug()<<"Connected to Camera - 02...";
+    namedWindow(winName);
+    moveWindow(winName,mConfig._config.frmWidth,0);
+    int flameRecently=1;
+    bool isMoving = false;
     while(true)
     {
         // Checks if the process should be aborted
         m_mutex.lock();
         bool abort = m_abort;
         m_mutex.unlock();
-
-
         if (abort)
         {
             qDebug()<<"Request worker aborting in Thread "<<thread()->currentThreadId();
             break;
         }
-
         try
         {
 
@@ -466,17 +555,18 @@ void VideoWork::doWork3()
             cv::cvtColor(mFrame,mFrame, CV_BGRA2GRAY);
 #endif
             mFrame = mFrame(mROI);
+
             if (true)//xu ly 3 frame 1 lan
             {
                 m_mutex.lock();
-                videoHandler->mVideoChannel = 3;
+                videoHandler->mVideoChannel = 2;
                 m_mutex.unlock();
                 int res = mDetector.detect(mFrame);
                 if(res>mConfig._config.alarmLevel)videoHandler->ActivateAlarm();
                 if (res>1)
                 {
-                    StartCamera("192.168.100.102");
-                    StopCamera("192.168.100.102");
+                    StartCamera(ipadr);
+                    StopCamera(ipadr);
                     flameRecently = 3000;
                     if(saveFrame())
                     {
@@ -489,9 +579,10 @@ void VideoWork::doWork3()
                 {
                     if(flameRecently>-1)flameRecently--;
                     if(flameRecently==0)
+
                     {
-                        StopCamera("192.168.100.102");
-                        StartCamera("192.168.100.102");
+                        StopCamera(ipadr);
+                        StartCamera(ipadr);
                     }
                 }
             }
@@ -504,7 +595,7 @@ void VideoWork::doWork3()
             cv::putText(m_Frame,(QString::fromUtf8("Alarm level: ")+QString::number(mConfig._config.alarmLevel)).toStdString(),
                         cvPoint(250, 20), CV_FONT_HERSHEY_SIMPLEX, 0.5, cvScalar(255, 255, 0));
             resize(m_Frame, m_Frame, cvSize(mConfig._config.frmWidth, mConfig._config.frmHeight));
-            imshow("Camera-03", m_Frame);
+            imshow(winName, m_Frame);
 
 #ifdef TEST_MODE
             int nKey = waitKey(40);
@@ -516,12 +607,36 @@ void VideoWork::doWork3()
                 mConfig._config.alarmLevel = (nKey - 48);
                 mConfig.SaveXmlFile();
             }
+
             else if (nKey == 32)
                 resetProgram();
             else if (nKey == 27)
                 closeProgram();
-
-            //if(waitKey(10)==32)resetProgram();
+            else if (nKey =='w')
+            {
+                moveUp(ipadr);
+                isMoving = true;
+            }
+            else if (nKey =='s')
+            {
+                moveDown(ipadr);
+                isMoving = true;
+            }
+            else if (nKey =='a')
+            {
+                moveLeft(ipadr);
+                isMoving = true;
+            }
+            else if (nKey =='d')
+            {
+                moveRight(ipadr);
+                isMoving = true;
+            }
+            else if (isMoving)
+            {
+                StopCamera(ipadr);
+                isMoving = false;
+            }
 
            // phan code duoc bao ve
         }catch(...)
@@ -534,10 +649,10 @@ void VideoWork::doWork3()
     // ...
     // Set _working to false, meaning the process can't be aborted anymore.
     m_mutex.lock();
+    mCapture.release();
     m_working = false;
     m_IsFinished = true;
     m_mutex.unlock();
-
     emit finished();
 }
 
