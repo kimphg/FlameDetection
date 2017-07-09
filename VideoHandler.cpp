@@ -55,6 +55,9 @@ void VideoHandler::onTimer()
         m_worker->setTilt("192.168.100.100",angle);
         m_worker->setTilt("192.168.100.101",angle);
         m_worker->setTilt("192.168.100.102",angle);
+        m_worker->setTilt("192.168.100.100",angle);
+        m_worker->setTilt("192.168.100.101",angle);
+        m_worker->setTilt("192.168.100.102",angle);
     }
     else
     {
@@ -67,7 +70,7 @@ int VideoHandler::handle()
 {
     QTimer *timer = new QTimer(this);
     QObject::connect(timer, SIGNAL(timeout()), this, SLOT(onTimer()));
-    timer->start(200000);
+    timer->start(300000);
 
     mVideoChannel = 0;
     //alarmSocket = new QUdpSocket();

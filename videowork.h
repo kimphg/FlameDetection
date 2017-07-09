@@ -13,7 +13,15 @@
 #include "Config.h"
 //#include "videowork.h"
 #include "FlameDetector.h"
+#include <QThread>
 
+class Sleeper : public QThread
+{
+public:
+    static void usleep(unsigned long usecs){QThread::usleep(usecs);}
+    static void msleep(unsigned long msecs){QThread::msleep(msecs);}
+    static void sleep(unsigned long secs){QThread::sleep(secs);}
+};
 
 class VideoWork : public QObject
 {
@@ -33,6 +41,7 @@ public:
 
     void setTilt(QString ipadr, int angle);
 private:
+
     bool    m_abort;
     bool    m_working;
     QMutex  m_mutex;
@@ -42,7 +51,7 @@ private:
     QNetworkAccessManager *qnam;
 
     void StopCamera(QString ipadr);
-    void StartCamera(QString ipadr);
+    void StartCamera(QString ipadr, int rate);
     void resetProgram();
     void closeProgram();
 
@@ -50,6 +59,7 @@ private:
     void moveDown(QString ipadr);
     void moveLeft(QString ipadr);
     void moveRight(QString ipadr);
+    void commonWork(std::string url, QString ipadr, std::string winName, int videoPosition);
 signals:
     void workRequested();
     void finished();
