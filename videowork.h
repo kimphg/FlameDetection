@@ -40,6 +40,7 @@ public:
     const FlameDetector& getDetector() const { return mDetector; }
 
     void setTilt(QString ipadr, int angle);
+    void setTilt(int angle);
 private:
 
     bool    m_abort;
@@ -59,7 +60,7 @@ private:
     void moveDown(QString ipadr);
     void moveLeft(QString ipadr);
     void moveRight(QString ipadr);
-    void commonWork(std::string url, QString ipadr, std::string winName, int videoPosition);
+    void commonWork(std::string url, QString ipadr, std::string winName, int videoPosition, int videoChanel);
 signals:
     void workRequested();
     void finished();

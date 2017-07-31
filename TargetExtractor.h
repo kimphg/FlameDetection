@@ -46,12 +46,13 @@ public:
 
 
 class TargetExtractor {
-
+public:
+    Mat mMask;
 private:
     static const int MAX_MASK_QUEUE_SIZE = 10;
 
     Mat mFrame;
-    Mat mMask;
+
     Mat mEdge;
     queue<Mat> mMaskQueue;
     Mat mMaskSum;
@@ -81,6 +82,7 @@ private:
 public:
     TargetExtractor();
     const Mat& getMask() const {
+
         return mMask;
     }
     void extract(const Mat& frame, map<int, Target>& targets, bool track);

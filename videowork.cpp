@@ -47,6 +47,10 @@ void VideoWork::StartCamera(QString ipadr,int rate)
     loop.exec();
 
 }
+void VideoWork::setTilt(int angle)
+{
+
+}
 void VideoWork::setTilt(QString ipadr,int angle)
 {
     switch(angle)
@@ -114,8 +118,9 @@ void VideoWork::onTimer()
     printf("\ncommand sent");
     //_flushall();
 }
-void VideoWork::commonWork(std::string url, QString ipadr,std::string winName,int videoPosition)
+void VideoWork::commonWork(std::string url, QString ipadr,std::string winName,int videoPosition,int videoChanel)
 {
+    int chanel = videoChanel;
     int scanRate = 3;
     VideoCapture mCapture(url);
     Mat mFrame;
@@ -176,9 +181,10 @@ void VideoWork::commonWork(std::string url, QString ipadr,std::string winName,in
             if (true)//xu ly 3 frame 1 lan
             {
                 m_mutex.lock();
+                videoHandler->mVideoChannel = chanel;
+                int res = mDetector.detect(mFrame);
 
                 m_mutex.unlock();
-                int res = mDetector.detect(mFrame);
                 if(mDetector.mTargetMap.size())
                 {
                     if(scanRate>1)
@@ -208,7 +214,7 @@ void VideoWork::commonWork(std::string url, QString ipadr,std::string winName,in
                     {
                         videoHandler->ActivateAlarm();
                         StartCamera(ipadr,0);
-                        frameCountDown = 2000;
+                        frameCountDown = 1200;
                         if(saveFrame())
                         {
 
@@ -332,7 +338,7 @@ void VideoWork::doWork()
     std::string winName = "Camera-01";
     videoHandler->mVideoChannel = 1;
     int videoPosition = 0;
-    commonWork(url,  ipadr, winName, videoPosition);
+    commonWork(url,  ipadr, winName, videoPosition,1);
 
 }
 void VideoWork::resetProgram()
@@ -350,9 +356,10 @@ void VideoWork::doWork2()
     std::string url = mConfig._config.strCamUrl2;
     QString ipadr = "192.168.100.101";
     std::string winName = "Camera-02";
+    int chanel = 2;
     videoHandler->mVideoChannel = 2;
     int videoPosition = 1;
-    commonWork(url,  ipadr, winName, videoPosition);
+    commonWork(url,  ipadr, winName, videoPosition,chanel);
 }
 void VideoWork::moveUp(QString ipadr)
 {
@@ -408,9 +415,9 @@ void VideoWork::doWork3()
     std::string url = mConfig._config.strCamUrl3;
     QString ipadr = "192.168.100.102";
     std::string winName = "Camera-03";
-    videoHandler->mVideoChannel = 3;
+    //videoHandler->mVideoChannel = 3;
     int videoPosition = 2;
-    commonWork(url,  ipadr, winName, videoPosition);
+    commonWork(url,  ipadr, winName, videoPosition,3);
 
 }
 
@@ -425,14 +432,22 @@ bool VideoWork::saveFrame()
 //        return false;
 //    if ((mDetector.m_Rect.x +mDetector.m_Rect.width )> (mConfig._config.frmWidth*2/3))
 //        return false;
-    if ((mDetector.m_Rect.y + mDetector.m_Rect.height) >= (mConfig._config.frmHeight - mConfig._config.cropY - 2))
-        return false;
+    //if ((mDetector.m_Rect.y + mDetector.m_Rect.height) >= (mConfig._config.frmHeight - mConfig._config.cropY - 2))
+        //return false;
+    for (map<int, Target>::iterator it = mDetector.mTargetMap.begin(); it != mDetector.mTargetMap.end(); it++)
+    {
+        if((it->second.isSaved==false)&&(it->second.isFlame==true))
+        {
+            it->second.isSaved=true;
+            string fileName;
+            getCurTime(fileName);
+            fileName += ".jpg";
+            cout << "Saving key frame to '" << fileName << "'." << endl;
+            //printf("times: %d\n",it->second.times);
+             imwrite("C:\\FlameDetector\\" +fileName, m_Frame);
+             break;
+        }
+    }
+    return true;
 
-    // save detected frame to jpg
-    string fileName;
-    getCurTime(fileName);
-    fileName += ".jpg";
-    cout << "Saving key frame to '" << fileName << "'." << endl;
-    //printf("times: %d\n",it->second.times);
-    return imwrite("C:\\FlameDetector\\" +fileName, m_Frame);
 }

@@ -20,7 +20,6 @@ struct Target {
     static const int TARGET_NEW = 1;
     static const int TARGET_LOST = 2;
     static const int TARGET_MERGED = 3;
-    
     int type;
     int times;
     int lostTimes;
