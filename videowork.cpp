@@ -425,14 +425,22 @@ bool VideoWork::saveFrame()
 //        return false;
 //    if ((mDetector.m_Rect.x +mDetector.m_Rect.width )> (mConfig._config.frmWidth*2/3))
 //        return false;
-    if ((mDetector.m_Rect.y + mDetector.m_Rect.height) >= (mConfig._config.frmHeight - mConfig._config.cropY - 2))
-        return false;
+    //if ((mDetector.m_Rect.y + mDetector.m_Rect.height) >= (mConfig._config.frmHeight - mConfig._config.cropY - 2))
+        //return false;
+    for (map<int, Target>::iterator it = mDetector.mTargetMap.begin(); it != mDetector.mTargetMap.end(); it++)
+    {
+        if((it->second.isSaved==false)&&(it->second.isFlame==true))
+        {
+            it->second.isSaved=true;
+            string fileName;
+            getCurTime(fileName);
+            fileName += ".jpg";
+            cout << "Saving key frame to '" << fileName << "'." << endl;
+            //printf("times: %d\n",it->second.times);
+             imwrite("C:\\FlameDetector\\" +fileName, m_Frame);
+             break;
+        }
+    }
+    return true;
 
-    // save detected frame to jpg
-    string fileName;
-    getCurTime(fileName);
-    fileName += ".jpg";
-    cout << "Saving key frame to '" << fileName << "'." << endl;
-    //printf("times: %d\n",it->second.times);
-    return imwrite("C:\\FlameDetector\\" +fileName, m_Frame);
 }

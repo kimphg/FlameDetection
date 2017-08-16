@@ -479,18 +479,19 @@ void Feature::printValue() const
 
 bool Feature::checkValid()
 {
-    if(mConfig._config.alarmLevel>6)
+    if(mConfig._config.alarmLevel>5)
     {
        if(diffInOut< 70||frameDiffMean<7.0)return false;
+       if(frameDiffMean<6.0)return false;
     }
-    else if(diffInOut< mConfig._config.diffInOut||frameDiffMean<6.0)return false;
-    if(!circularityMean
-            *squarenessMean
-            *aspectRatioMean
-            *frameDiffMean
-            *circularityVar
-            *squarenessVar*aspectRatioVar*roughness*diffInOut*texture[0]*texture[1]*texture[2]*texture[3])
-        return false;
+
+//    if(!circularityMean
+//            *squarenessMean
+//            *aspectRatioMean
+//            *frameDiffMean
+//            *circularityVar
+//            *squarenessVar*aspectRatioVar*roughness*diffInOut*texture[0]*texture[1]*texture[2]*texture[3])
+//        return false;
     return true;
 }
 

@@ -195,7 +195,6 @@ int FlameDecider::judge(map<int, Target>& targets)
         if(flameDetected<it->second.flameCount)flameDetected = it->second.flameCount;
         if (flameDetected)
         {
-
             m_Rect = it->second.region.rect;
 
             ofstream ofs("detection.txt", ios::app);

@@ -9,7 +9,7 @@
 #include "utils.h"
 
 void getCurTime(string& curTime)
-{
+{    
     time_t rawtime;
     struct tm* timeinfo;
     time(&rawtime);
@@ -17,9 +17,10 @@ void getCurTime(string& curTime)
     
     char buffer[128];
     strftime(buffer, 128, "%m-%d_%H-%M-%S", timeinfo);
-    
+
     curTime = buffer;
 }
+
 
 // this function is an alternative to the old one which is implemented with 'sum'
 void calcDensity(const Mat& mask, Mat& density, int ksize)
