@@ -50,27 +50,27 @@ void VideoHandler::DeactivateAlarm()
 int angle = 0;
 void VideoHandler::onTimer()
 {
-    if(angle <3)
-    {
-        m_worker->setTilt("192.168.100.100",angle);
-        m_worker->setTilt("192.168.100.101",angle);
-        m_worker->setTilt("192.168.100.102",angle);
-        m_worker->setTilt("192.168.100.100",angle);
-        m_worker->setTilt("192.168.100.101",angle);
-        m_worker->setTilt("192.168.100.102",angle);
-    }
-    else
-    {
+//    if(angle <3)
+//    {
+//        m_worker->setTilt("192.168.100.100",angle);
+//        m_worker->setTilt("192.168.100.101",angle);
+//        m_worker->setTilt("192.168.100.102",angle);
+//        m_worker->setTilt("192.168.100.100",angle);
+//        m_worker->setTilt("192.168.100.101",angle);
+//        m_worker->setTilt("192.168.100.102",angle);
+//    }
+//    else
+//    {
        std::system("reset.bat");
-    }
-    angle++;
+//    }
+//    angle++;
 
 }
 int VideoHandler::handle()
 {
     QTimer *timer = new QTimer(this);
     QObject::connect(timer, SIGNAL(timeout()), this, SLOT(onTimer()));
-    timer->start(300000);
+    timer->start(900000);
 
     mVideoChannel = 0;
     //alarmSocket = new QUdpSocket();
