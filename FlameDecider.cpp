@@ -163,6 +163,11 @@ inline bool FlameDecider::svmPredict(const Feature& feature)
     tesst =tesst;
     float result = mSVM.predict(Mat(feature));
     //cout << "result: " << result << endl;
+//    if(result)
+//    {
+//        int a;
+//        a=0;
+//    }
 	return result == 1.0;
 }
 
@@ -187,7 +192,10 @@ int FlameDecider::judge(map<int, Target>& targets)
 
         }
         if(isFlame)
-        { it->second.flameCount++; }
+        {
+            it->second.flameCount++;
+            //it->second.feature.printValue();
+        }
         else
         {
             if(it->second.flameCount)it->second.flameCount--;

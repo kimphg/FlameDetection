@@ -114,8 +114,14 @@ void Feature::calcGeometryFeature(const Region& region)
         }
     }
     int areaTotal = mTargetFrame.rows*mTargetFrame.cols;
-    if(!countInside) diffInOut = 0;
-    else if(countInside>=areaTotal)diffInOut = 0;
+    if(!countInside)
+    {
+        diffInOut = 0;
+        //cv::imshow("mask1",mMask);
+        //cv::imshow("target",mTargetFrame);
+    }
+    else if(countInside>=areaTotal)
+        diffInOut = 0;
     else
     {
         avrInside/=countInside;
@@ -284,32 +290,39 @@ Feature::Feature()
     areaVar=0;
 }
 
-void Feature::calc(const Region& region, const Mat& frame)
+void Feature::calc(const Region& region, const Mat& frame,Mat iMask)
 {
     Mat mNewFrame = frame(region.rect);
+    mMask = iMask(region.rect);
+    //cv::imshow("mask origin",iMask);
+    //cv::imshow("mask",mMask);
     //const Mat& mask = videoHandler->getDetector().getExtractor().getMask();
-
+    /*
     if (videoHandler->mVideoChannel == 2)
     {
         const Mat& mask = m_worker2->getDetector().getExtractor().getMask();
+
         mMask = mask(region.rect);
     }
     else if (videoHandler->mVideoChannel == 3)
     {
         const Mat& mask = m_worker3->getDetector().getExtractor().getMask();
         mMask = mask(region.rect);
+        //cv::imshow("mask origin",mask);
     }
     else if (videoHandler->mVideoChannel == 1)
     {
         const Mat& mask = m_worker->getDetector().getExtractor().getMask();
         mMask = mask(region.rect);
+        //cv::imshow("mask origin",mask);
+        //cv::imshow("mask",mMask);
     }
     else  //(videoHandler->mVideoChannel == 0) // default - for Training mode
     {
         const Mat& mask = videoHandler->getDetector().getExtractor().getMask();
         mMask = mask(region.rect);
 
-    }
+    }*/
 
 
 #ifndef MODE_GRAYSCALE
@@ -479,12 +492,29 @@ void Feature::printValue() const
 
 bool Feature::checkValid()
 {
-    if(mConfig._config.alarmLevel>5)
-    {
-       if(diffInOut< 70||frameDiffMean<7.0)return false;
-       if(frameDiffMean<6.0)return false;
-    }
 
+    if(mConfig._config.alarmLevel>8)
+    {
+       if(diffInOut< 75||frameDiffMean<8)return false;
+    }
+    else if(mConfig._config.alarmLevel>6)
+    {
+       if(diffInOut< 70||frameDiffMean<7)return false;
+
+    }
+    else if(mConfig._config.alarmLevel>4)
+    {
+        if(diffInOut< 65||frameDiffMean<6)return false;
+    }
+    else if(mConfig._config.alarmLevel>2)
+    {
+        if(diffInOut< 60||frameDiffMean<5)return false;
+    }
+    else
+    {
+        if(diffInOut< 60||frameDiffMean<4)
+            return false;
+    }
 //    if(!circularityMean
 //            *squarenessMean
 //            *aspectRatioMean
@@ -634,7 +664,7 @@ void FeatureAnalyzer::featureMerge(Target& target, const map<int, Target>& targe
     Feature::merge(featureVec, target.feature);
 }
 
-void FeatureAnalyzer::targetUpdate(map<int, Target>& targets)
+void FeatureAnalyzer::targetUpdate(map<int, Target>& targets,Mat iMask)
 {
     for (map<int, Target>::iterator it = targets.begin(); it != targets.end(); )
     {
@@ -670,16 +700,16 @@ void FeatureAnalyzer::targetUpdate(map<int, Target>& targets)
     for (map<int, Target>::iterator it = targets.begin(); it != targets.end(); it++) {
         Target& target = it->second;
         if (target.type != Target::TARGET_LOST) {
-            target.feature.calc(target.region, mFrame);
+            target.feature.calc(target.region, mFrame,iMask);
         }
     }
 }
 
-void FeatureAnalyzer::analyze(const Mat& frame, map<int, Target>& targets)
+void FeatureAnalyzer::analyze(const Mat& frame, map<int, Target>& targets, Mat iMask)
 {
     mFrame = frame;
     
-    targetUpdate(targets);
+    targetUpdate(targets,iMask);
     
 
 #ifdef DEBUG_MODE

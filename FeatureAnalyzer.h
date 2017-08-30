@@ -58,7 +58,7 @@ public:
     double frameDiffVar,frameDiffMean;
     double frequency;
     double areaVar;
-    void calc(const Region& region, const Mat& frame);
+    void calc(const Region& region, const Mat& frame, Mat iMask);
     static void merge(const vector<const Feature*>& src, Feature& feature);
     void printValue()const;
     bool checkValid();
@@ -82,10 +82,10 @@ private:
     
     void featureUpdate(Target& target);
     void featureMerge(Target& target, const map<int, Target>& targets, const vector<int>& keys);
-    void targetUpdate(map<int, Target>& targets);
+    void targetUpdate(map<int, Target>& targets, Mat iMask);
 
 public:
-    void analyze(const Mat& frame, map<int, Target>& targets);
+    void analyze(const Mat& frame, map<int, Target>& targets, Mat iMask);
 };
 
 #endif /* defined(__FlameDetection__FeatureAnalyzer__) */
